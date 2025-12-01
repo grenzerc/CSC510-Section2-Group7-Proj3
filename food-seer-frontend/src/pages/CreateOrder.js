@@ -75,8 +75,15 @@ const CreateOrder = () => {
 
   const clearCart = () => { setCart({}); };
 
+  const getDeliveryCost = () => {
+    const itemsTotal = Object.values(cart).reduce((total, item) => total + (item.food.price * item.quantity), 0);
+    return parseFloat((0.3 * itemsTotal).toFixed(2));
+  }
+
   const getTotalPrice = () => {
-    return Object.values(cart).reduce((total, item) => total + (item.food.price * item.quantity), 0);
+    const itemsTotal = Object.values(cart).reduce((total, item) => total + (item.food.price * item.quantity), 0);
+    const delivery = getDeliveryCost();
+    return parseFloat((itemsTotal + delivery).toFixed(2));
   };
 
   const getTotalItems = () => {
@@ -98,7 +105,8 @@ const CreateOrder = () => {
       const orderFoods = Object.values(cart).flatMap(item => 
         Array(item.quantity).fill({ id: item.food.id })
       );
-      const orderData = { name: orderName, foods: orderFoods, isFulfilled: false };
+      const orderData = { name: orderName, foods: orderFoods, isFulfilled: false, cost: getTotalPrice(), status: 'Placed', deliveryCost: getDeliveryCost() };
+      console.log('Submitting order data:', orderData);
       await createOrder(orderData);
       alert('Order placed successfully!');
       navigate('/orders');
@@ -231,6 +239,7 @@ const CreateOrder = () => {
               </div>
               <div className="cart-summary">
                 <div className="summary-row"><span>Total Items:</span><span>{getTotalItems()}</span></div>
+                <div className="summary-row"><span>Delivery fee:</span><span>{getDeliveryCost()}</span></div>
                 <div className="summary-row total"><span>Total Price:</span><span>${getTotalPrice()}</span></div>
               </div>
               <div className="cart-actions">

@@ -49,6 +49,12 @@ public class OrderMapper {
         dto.setRatedFoodIds(order.getRatedFoodIds());
         // -----------------------
 
+        dto.setCost(order.getCost());
+        dto.setStatus(order.getStatus());
+        dto.setDeliveryCost(order.getDeliveryCost());
+
+//        dto.setDriverStats(DriverStatsMapper.mapToDriverStatsDto(order.getDriver()));
+
         return dto;
     }
 
@@ -71,6 +77,9 @@ public class OrderMapper {
                 .collect(Collectors.toList()));
 
         order.setIsFulfilled(orderDto.getIsFulfilled());
+
+        order.setDriver(orderDto.getDriverStats());
+        order.setDeliveryCost(orderDto.getDeliveryCost());
         
         // Note: We do NOT map ratedFoodIds back here.
         // The service layer handles adding IDs to the history one by one.

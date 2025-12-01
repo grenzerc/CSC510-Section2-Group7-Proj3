@@ -21,6 +21,7 @@ import FoodSeer.TestUtils;
 import FoodSeer.dto.FoodDto;
 import FoodSeer.repositories.FoodRepository;
 import FoodSeer.repositories.InventoryRepository;
+import FoodSeer.repositories.OrderRepository;
 import FoodSeer.service.FoodService;
 
 /**
@@ -28,6 +29,7 @@ import FoodSeer.service.FoodService;
  */
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 public class FoodControllerTest {
 
     /** Mock MVC for testing controller */
@@ -42,6 +44,10 @@ public class FoodControllerTest {
     @Autowired
     private InventoryRepository inventoryRepository;
 
+    /** Reference to order repository (ensure orders removed before foods) */
+    @Autowired
+    private OrderRepository orderRepository;
+
     /** Reference to food service */
     @Autowired
     private FoodService foodService;
@@ -49,44 +55,31 @@ public class FoodControllerTest {
     /**
      * Sets up the test case.
      *
-     * @throws java.lang.Exception
-     *             if error
+     * @throws java.lang.Exception if error
      */
     @BeforeEach
     public void setUp () throws Exception {
-        foodRepository.deleteAll();
+        // delete orders first so foreign key constraints do not block food deletions
+        orderRepository.deleteAll();
         inventoryRepository.deleteAll();
+        foodRepository.deleteAll();
     }
 
-    /**
-     * Tests GET /api/foods endpoint
-     *
-     * @throws Exception
-     *             if error
-     */
     @Test
-    @Transactional
     @WithMockUser ( username = "staff", roles = "STAFF" )
     void testGetFoods () throws Exception {
         mvc.perform( get( "/api/foods" ) ).andExpect( status().isOk() );
     }
 
-    /**
-     * Tests POST /api/foods endpoint (createFood)
-     *
-     * @throws Exception
-     *             if error
-     */
     @Test
-    @Transactional
     @WithMockUser ( username = "staff", roles = "STAFF" )
     void testCreateFood () throws Exception {
         final FoodDto food1 = new FoodDto( "COFFEE", 5, 3, Arrays.asList( "MILK", "SUGAR" ) );
 
         mvc.perform( post( "/api/foods" )
-                .contentType( MediaType.APPLICATION_JSON )
-                .content( TestUtils.asJsonString( food1 ) )
-                .accept( MediaType.APPLICATION_JSON ) )
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( TestUtils.asJsonString( food1 ) )
+                        .accept( MediaType.APPLICATION_JSON ) )
                 .andExpect( status().isOk() )
                 .andExpect( jsonPath( "$.amount" ).value( "5" ) )
                 .andExpect( jsonPath( "$.price" ).value( "3" ) )
@@ -96,118 +89,98 @@ public class FoodControllerTest {
         final FoodDto savedFood2 = foodService.createFood( food2 );
 
         mvc.perform(
-                get( "/api/foods/" + foodService.getFoodById( savedFood2.getId() ).getId() ) )
+                        get( "/api/foods/" + foodService.getFoodById( savedFood2.getId() ).getId() ) )
                 .andExpect( status().isOk() );
     }
 
-    /**
-     * Tests updateFood endpoint
-     *
-     * @throws Exception
-     *             if error
-     */
     @Test
-    @Transactional
     @WithMockUser ( username = "staff", roles = "STAFF" )
     void testUpdateFood () throws Exception {
         final FoodDto food1 = new FoodDto( "COFFEE", 5, 3, Arrays.asList( "MILK" ) );
-    
+
         mvc.perform( post( "/api/foods" )
-                .contentType( MediaType.APPLICATION_JSON )
-                .content( TestUtils.asJsonString( food1 ) )
-                .accept( MediaType.APPLICATION_JSON ) )
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( TestUtils.asJsonString( food1 ) )
+                        .accept( MediaType.APPLICATION_JSON ) )
                 .andExpect( status().isOk() )
                 .andExpect( jsonPath( "$.amount" ).value( "5" ) )
                 .andExpect( jsonPath( "$.foodName" ).value( "COFFEE" ) );
-    
+
         final FoodDto updatedFood = new FoodDto( "COFFEE", 12, 4, Arrays.asList( "MILK", "SUGAR" ) );
-    
+
         mvc.perform( post( "/api/foods/updateFood" )
-                .contentType( MediaType.APPLICATION_JSON )
-                .content( TestUtils.asJsonString( updatedFood ) )
-                .accept( MediaType.APPLICATION_JSON ) )
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( TestUtils.asJsonString( updatedFood ) )
+                        .accept( MediaType.APPLICATION_JSON ) )
                 .andExpect( status().isOk() );
     }
-    
+
     @Test
-    @Transactional
     @WithMockUser(username = "staff", roles = "STAFF")
     void testCreateFoodDuplicateName() throws Exception {
         FoodDto food = new FoodDto("COFFEE", 5, 3, Arrays.asList("MILK"));
         foodService.createFood(food);
 
         mvc.perform(post("/api/foods")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtils.asJsonString(food)))
-            .andExpect(status().isConflict()); // 409
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.asJsonString(food)))
+                .andExpect(status().isConflict()); // 409
     }
 
-    
     @Test
-    @Transactional
     @WithMockUser(username = "staff", roles = "STAFF")
     void testCreateFoodInvalid() throws Exception {
         // Negative amount = invalid
         FoodDto invalid = new FoodDto("INVALID", -5, 3, Arrays.asList("NONE"));
 
         mvc.perform(post("/api/foods")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtils.asJsonString(invalid)))
-            .andExpect(status().isBadRequest()); // 400
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.asJsonString(invalid)))
+                .andExpect(status().isBadRequest()); // 400
     }
 
-    
     @Test
-    @Transactional
     @WithMockUser(username = "staff", roles = "STAFF")
     void testDeleteFoodSuccess() throws Exception {
         FoodDto food = new FoodDto("TEA", 5, 3, Arrays.asList("NONE"));
         FoodDto saved = foodService.createFood(food);
 
         mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                .delete("/api/foods/" + saved.getId()))
-            .andExpect(status().isOk());
+                        .delete("/api/foods/" + saved.getId()))
+                .andExpect(status().isOk());
     }
 
-    
     @Test
-    @Transactional
     @WithMockUser(username = "staff", roles = "STAFF")
     void testDeleteFoodNotFound() throws Exception {
         mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                .delete("/api/foods/9999"))
-            .andExpect(status().isNotFound());
+                        .delete("/api/foods/9999"))
+                .andExpect(status().isNotFound());
     }
 
-    
     @Test
-    @Transactional
     @WithMockUser(username = "staff", roles = "STAFF")
     void testUpdateFoodMissingName() throws Exception {
         FoodDto invalid = new FoodDto("", 5, 3, Arrays.asList("NONE"));
 
         mvc.perform(post("/api/foods/updateFood")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtils.asJsonString(invalid)))
-            .andExpect(status().isBadRequest());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.asJsonString(invalid)))
+                .andExpect(status().isBadRequest());
     }
 
-    
     @Test
-    @Transactional
     @WithMockUser(username = "staff", roles = "STAFF")
     void testUpdateFoodNotFound() throws Exception {
         FoodDto notExist = new FoodDto("NOFOOD", 5, 3, Arrays.asList("NONE"));
 
         mvc.perform(post("/api/foods/updateFood")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtils.asJsonString(notExist)))
-            .andExpect(status().isNotFound());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.asJsonString(notExist)))
+                .andExpect(status().isNotFound());
     }
 
-    
     @Test
-    @Transactional
     @WithMockUser(username = "staff", roles = "STAFF")
     void testUpdateFoodInvalidValues() throws Exception {
         FoodDto food = new FoodDto("BREAD", 5, 2, Arrays.asList("GLUTEN"));
@@ -216,8 +189,8 @@ public class FoodControllerTest {
         FoodDto update = new FoodDto("BREAD", -1, 2, Arrays.asList("GLUTEN")); // invalid amount
 
         mvc.perform(post("/api/foods/updateFood")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtils.asJsonString(update)))
-            .andExpect(status().isBadRequest());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.asJsonString(update)))
+                .andExpect(status().isBadRequest());
     }
 }

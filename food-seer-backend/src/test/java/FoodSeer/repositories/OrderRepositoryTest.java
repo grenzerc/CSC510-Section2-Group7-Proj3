@@ -1,10 +1,13 @@
+// java
 package FoodSeer.repositories;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import FoodSeer.service.FoodService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +15,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.transaction.annotation.Transactional;
 
-import FoodSeer.dto.FoodDto;
 import FoodSeer.dto.InventoryDto;
 import FoodSeer.dto.OrderDto;
 import FoodSeer.entity.Food;
 import FoodSeer.entity.User;
-import FoodSeer.service.FoodService;
 import FoodSeer.service.InventoryService;
 import FoodSeer.service.OrderService;
 
@@ -105,5 +106,38 @@ class OrderRepositoryTest {
         assertEquals(savedOrder.getId(),
                 orderRepository.getReferenceById(savedOrder.getId()).getId(),
                 "The saved and retrieved order IDs should match");
+    }
+
+    /**
+     * Tests repository query methods: findOrdersContainingFood and findByUser / findByUserAndIsFulfilled.
+     */
+    @Test
+    @Transactional
+    @WithMockUser(username = "customer", roles = "CUSTOMER")
+    void testFindOrdersContainingFoodAndFindByUser() {
+        final List<Food> foods = foodRepository.findAll();
+
+        // Create an order that includes the first food item
+        final OrderDto orderDto = new OrderDto(0L, "OrderWithCoffee");
+        orderDto.setFoods(List.of(foods.get(0))); // COFFEE
+
+        final OrderDto savedOrder = orderService.createOrder(orderDto);
+
+        // Verify findOrdersContainingFood returns the created order when queried with that food
+        List<Food> allFoods = foodRepository.findAll();
+        Food coffee = allFoods.stream().filter(f -> "COFFEE".equals(f.getFoodName())).findFirst().orElseThrow();
+
+        var ordersWithCoffee = orderRepository.findOrdersContainingFood(coffee);
+        assertEquals(1, ordersWithCoffee.size(), "Should find one order containing COFFEE");
+        assertTrue(ordersWithCoffee.stream().anyMatch(o -> o.getId().equals(savedOrder.getId())));
+
+        // Verify findByUser and findByUserAndIsFulfilled
+        User user = userRepository.findAll().get(0); // the created customer
+        var ordersByUser = orderRepository.findByUser(user);
+        assertTrue(ordersByUser.size() >= 1, "User should have at least one order");
+
+        var unfulfilledByUser = orderRepository.findByUserAndIsFulfilled(user, false);
+        assertTrue(unfulfilledByUser.stream().anyMatch(o -> o.getId().equals(savedOrder.getId())),
+                "Saved order should appear as unfulfilled for the user");
     }
 }

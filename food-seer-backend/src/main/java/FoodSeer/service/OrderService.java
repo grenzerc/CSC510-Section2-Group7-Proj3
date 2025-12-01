@@ -81,5 +81,9 @@ public interface OrderService {
      */
     List<OrderDto> getCurrentUserUnfulfilledOrders();
 
-    OrderDto updateOrder(final Long id);
+    OrderDto updateOrder(final Long id, String username, String status);
+
+    List<OrderDto> getAvailableOrders();
+
+    List<OrderDto> getActiveOrders(String username);
 }

@@ -2,6 +2,7 @@ package FoodSeer.controller;
 
 import java.util.List;
 
+import FoodSeer.dto.UpdateOrderDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +71,7 @@ public class OrderController {
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF', 'CUSTOMER')")
     @PostMapping
     public ResponseEntity<OrderDto> createOrder(@RequestBody final OrderDto orderDto) {
+        logger.info("Creating order: {}", orderDto.toString());
         final OrderDto savedOrderDto = orderService.createOrder(orderDto);
         return ResponseEntity.ok(savedOrderDto);
     }
@@ -154,10 +156,26 @@ public class OrderController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'DRIVER')")
-    @PostMapping("/{id}/status")
-    public ResponseEntity<?> updateOrderStatus(@PathVariable("id") final Long id){
+    @PostMapping("/{id}")
+    public ResponseEntity<?> updateOrderStatus(@PathVariable("id") final Long id, @RequestBody UpdateOrderDto updateOrderDto){
         logger.info("Updating order status for order ID: {}", id);
-        final OrderDto updatedOrderDto = orderService.updateOrder(id);
+        final OrderDto updatedOrderDto = orderService.updateOrder(id, updateOrderDto.username(), updateOrderDto.status());
         return ResponseEntity.ok(updatedOrderDto);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'DRIVER')")
+    @GetMapping("/availableOrders")
+    public ResponseEntity<?> getAvailableOrders(){
+        logger.info("Fetching all placed orders which are not picked up yet");
+        List<OrderDto> availableOrders = orderService.getAvailableOrders();
+        return ResponseEntity.ok(availableOrders);
+    }
+
+//    @PreAuthorize("hasAnyRole('ADMIN', 'DRIVER')")
+    @GetMapping("/activeOrders/{username}")
+    public ResponseEntity<?> getActiveOrders(@PathVariable String username){
+        logger.info("Fetching all picked up orders for the driver: {}", username);
+        List<OrderDto> activeOrders = orderService.getActiveOrders(username);
+        return ResponseEntity.ok(activeOrders);
     }
 }

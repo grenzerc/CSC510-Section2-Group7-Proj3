@@ -512,20 +512,58 @@ export const fetchDriverDashboard = async (user) => {
   return await response.json();
 };
 
-export const updateOrderStatus = async (orderId) => {
-  const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/status`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      // Add authorization header if needed
-      // 'Authorization': `Bearer ${getToken()}`
-    },
-  });
+export const updateOrderStatus = async (orderId, status, username) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
+      method: 'POST',
+      headers: createHeaders(true),
+      body: JSON.stringify({username, status}),
+    });
 
-  if (!response.ok) {
-    throw new Error('Failed to update order status');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to update order status');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Update order status error:', error);
+    throw error;
   }
-
-  return await response.json();
 };
 
+export const getAvailableOrders = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/orders/availableOrders`, {
+      method: 'GET',
+      headers: createHeaders(true),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch unfulfilled orders');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Get unfulfilled orders error:', error);
+    throw error;
+  }
+};
+
+export const getActiveOrders = async (username) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/orders/activeOrders/${username}`, {
+      method: 'GET',
+      headers: createHeaders(true),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch active orders');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Get active orders error:', error);
+    throw error;
+  }
+};

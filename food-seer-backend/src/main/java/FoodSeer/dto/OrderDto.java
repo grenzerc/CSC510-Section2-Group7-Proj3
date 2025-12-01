@@ -1,10 +1,12 @@
 package FoodSeer.dto;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet; // Added import
 import java.util.List;
 import java.util.Set;     // Added import
 
+import FoodSeer.entity.DriverStats;
 import FoodSeer.entity.Food;
 
 /**
@@ -24,6 +26,16 @@ public class OrderDto {
 
     /** Boolean used to track if the order has been fulfilled */
     private boolean isFulfilled;
+
+    private BigDecimal cost;
+
+    private String status;
+
+    private BigDecimal rating;
+
+    private DriverStats driverStats;
+
+    private BigDecimal deliveryCost;
 
     /**
      * Set of IDs representing foods in this order that have already been rated.
@@ -153,5 +165,45 @@ public class OrderDto {
      */
     public void setRatedFoodIds(final Set<Long> ratedFoodIds) {
         this.ratedFoodIds = ratedFoodIds;
+    }
+
+    public BigDecimal getCost() {
+        return cost;
+    }
+
+    public void setCost(BigDecimal cost) {
+        this.cost = cost;
+    }
+
+    public BigDecimal getRating() {
+        return rating;
+    }
+
+    public void setRating(BigDecimal rating) {
+        this.rating = rating;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public DriverStats getDriverStats() {
+        return driverStats;
+    }
+
+    public void setDriverStats(DriverStats driverStats) {
+        this.driverStats = driverStats;
+    }
+
+    public BigDecimal getDeliveryCost() {
+        return deliveryCost;
+    }
+
+    public void setDeliveryCost(BigDecimal deliveryCost) {
+        this.deliveryCost = deliveryCost;
     }
 }

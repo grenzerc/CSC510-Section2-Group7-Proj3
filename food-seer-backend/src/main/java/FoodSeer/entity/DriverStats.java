@@ -14,7 +14,7 @@ public class DriverStats {
     private String username;
 
     private int totalDeliveries;
-    private BigDecimal totalEarnings;
-    private BigDecimal averageRating;
+    private BigDecimal totalEarnings = new BigDecimal(0.00);
+    private BigDecimal averageRating = new BigDecimal(0.00);
     private int activeOrders;
 }

@@ -14,4 +14,14 @@ public class DriverStatsMapper {
 
     }
 
+    public static DriverStats mapToDriverStats(final DriverStatsDto driverStatsDto){
+        final DriverStats driverStats = new DriverStats();
+        driverStats.setUsername(driverStatsDto.username());
+        driverStats.setTotalDeliveries(driverStatsDto.totalDeliveries());
+        driverStats.setTotalEarnings(driverStatsDto.totalEarning());
+        driverStats.setAverageRating(driverStatsDto.averageRating());
+        driverStats.setActiveOrders(driverStatsDto.activeOrders());
+        return driverStats;
+    }
+
 }

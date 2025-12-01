@@ -2,6 +2,9 @@ package FoodSeer.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import FoodSeer.dto.FoodDto;
 import FoodSeer.dto.InventoryDto;
 import FoodSeer.exception.ResourceNotFoundException;
+import FoodSeer.repositories.FoodRepository;
 
 @SpringBootTest
 @Transactional
@@ -18,18 +22,25 @@ public class FoodServiceImplTest {
 
     @Autowired
     private FoodService foodService;
-    
+
     @Autowired
     private InventoryService inventoryService;
 
+    @Autowired
+    private FoodRepository foodRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @BeforeEach
-    public void setUp() throws Exception {
-        foodService.deleteAllFoods();
+    void setUp() {
+        entityManager.createNativeQuery("DELETE FROM orders_foods").executeUpdate();
+        foodRepository.deleteAll();
     }
 
     // --- Helpers -----------------------------------------------------
 
-    private void assertFood(FoodDto food, String name, int amount, int price, 
+    private void assertFood(FoodDto food, String name, int amount, int price,
                             java.util.List<String> allergies) {
         assertAll(
                 () -> assertEquals(name, food.getFoodName()),
@@ -103,7 +114,7 @@ public class FoodServiceImplTest {
         FoodDto updated = foodService.updateFood("COFFEE", 12, 5, Arrays.asList("Water"));
         assertFood(updated, "COFFEE", 12, 5, Arrays.asList("Water"));
     }
-    
+
     @Test
     public void testDeleteFoodSuccess() {
         FoodDto food = new FoodDto("LATTE", 5, 4, Arrays.asList("MILK"));
@@ -116,8 +127,8 @@ public class FoodServiceImplTest {
         foodService.deleteFood(created.getId());
 
         // Now food should be gone
-        assertThrows(ResourceNotFoundException.class, () -> 
-            foodService.getFoodById(created.getId())
+        assertThrows(ResourceNotFoundException.class, () ->
+                foodService.getFoodById(created.getId())
         );
     }
 
@@ -125,11 +136,11 @@ public class FoodServiceImplTest {
     public void testDeleteFoodNotFound() {
         Long badId = 9999L;
         ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class, () ->
-            foodService.deleteFood(badId)
+                foodService.deleteFood(badId)
         );
         assertEquals("Food does not exist with id " + badId, ex.getMessage());
     }
-    
+
     @Test
     public void testGetDuplicateNameExists() {
         FoodDto food = new FoodDto("COFFEE", 5, 3, Arrays.asList("MILK"));
@@ -147,7 +158,7 @@ public class FoodServiceImplTest {
         assertNull(result);
     }
 
-    
+
     @Test
     public void testIsValidFoodTrue() {
         FoodDto food = new FoodDto("TEA", 3, 2, Arrays.asList("NONE"));
@@ -166,14 +177,14 @@ public class FoodServiceImplTest {
         assertFalse(foodService.isValidFood(new FoodDto("TEA", 1, 1, Arrays.asList("", "MILK"))));
     }
 
-    
+
     @Test
     public void testUpdateFoodThrowsForNegativeAmount() {
         FoodDto food = new FoodDto("COFFEE", 5, 3, Arrays.asList("MILK"));
         foodService.createFood(food);
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-            foodService.updateFood("COFFEE", -5, 3, Arrays.asList("MILK"))
+                foodService.updateFood("COFFEE", -5, 3, Arrays.asList("MILK"))
         );
         assertEquals("The units of the food must be a positive integer.", ex.getMessage());
     }
@@ -184,23 +195,23 @@ public class FoodServiceImplTest {
         foodService.createFood(food);
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-            foodService.updateFood("COFFEE", 5, -1, Arrays.asList("MILK"))
+                foodService.updateFood("COFFEE", 5, -1, Arrays.asList("MILK"))
         );
         assertEquals("The price of the food must be a non-negative integer.", ex.getMessage());
     }
-    
+
     @Test
     @Transactional
     public void testUpdateFoodNotFound() {
         String missingName = "NON_EXISTENT_FOOD";
 
         ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class, () ->
-            foodService.updateFood(missingName, 5, 3, Arrays.asList("NONE"))
+                foodService.updateFood(missingName, 5, 3, Arrays.asList("NONE"))
         );
 
         assertEquals("Food does not exist with name " + missingName, ex.getMessage());
     }
-    
+
     @Test
     @Transactional
     public void testCreateFoodAddsToExistingInventory() {

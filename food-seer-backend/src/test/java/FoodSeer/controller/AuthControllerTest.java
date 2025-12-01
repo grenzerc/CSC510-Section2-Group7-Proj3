@@ -34,7 +34,7 @@ class AuthControllerTest {
     @BeforeEach
     void setUp() {
         loginRequest = new LoginRequestDto("testuser", "password123");
-        registerRequest = new RegisterRequestDto("testuser", "test@example.com", "password123");
+        registerRequest = new RegisterRequestDto("testuser", "test@example.com", "password123", "customer");
     }
 
     @Test
@@ -54,21 +54,20 @@ class AuthControllerTest {
 
     @Test
     void shouldRegisterSuccessfully() throws Exception {
-
         mockMvc.perform(post("/auth/register")
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(registerRequest)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Registered"));
-
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerRequest)))
+                .andDo(org.springframework.test.web.servlet.result.MockMvcResultHandlers.print()) // show response for debug
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Registered"));
     }
 
     @Test
     void shouldFailLoginWithInvalidCredentials() throws Exception {
-
         mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andDo(org.springframework.test.web.servlet.result.MockMvcResultHandlers.print()) // show response for debug
                 .andExpect(status().isUnauthorized());
     }
 

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { fetchDriverDashboard, getCurrentUser, getUnfulfilledOrders, updateOrderStatus } from "../services/api";
+import {fetchDriverDashboard, getCurrentUser, getAvailableOrders, getActiveOrders, updateOrderStatus, getUnfulfilledOrders } from "../services/api";
 
 const DriverDashboard = () => {
   const [stats, setStats] = useState(null);
-  const [orders, setOrders] = useState([]);
+  const [availableOrders, setAvailableOrders] = useState([]);
+  const [activeOrders, setActiveOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -11,14 +12,23 @@ const DriverDashboard = () => {
     const loadDashboard = async () => {
       try {
         const user = await getCurrentUser();
-        console.log("Current User: ", user.username);
-        const data = await fetchDriverDashboard(user.username);
-        console.log("Dashboard data: ", data);
-        const unfulfilledOrders = await getUnfulfilledOrders();
-        setOrders(unfulfilledOrders);
-        setStats(data);
+
+        const [
+          dashboardStats,
+          available,
+          active
+        ] = await Promise.all([
+          fetchDriverDashboard(user.username),
+          getAvailableOrders(user.username),
+          getActiveOrders(user.username)
+        ]);
+
+        setStats(dashboardStats);
+        setAvailableOrders(available);
+        setActiveOrders(active);
       } catch (err) {
-        setError(err.message);
+        console.error(err);
+        setError("Failed to load dashboard data.");
       } finally {
         setLoading(false);
       }
@@ -27,42 +37,33 @@ const DriverDashboard = () => {
     loadDashboard();
   }, []);
 
-  const handlePickupOrDeliver = async (orderId) => {
+  const handlePickUp = async (orderId) => {
     try {
-      // Find the current order
-      const currentOrder = orders.find(o => o.id === orderId);
-
-      // If not yet picked up, just update local state (no backend call)
-      if (!currentOrder.isPickedUp) {
-        setOrders((prev) =>
-          prev.map((o) => {
-            if (o.id !== orderId) return o;
-            return { ...o, isPickedUp: true, status: "PICKED_UP" };
-          })
-        );
-        return;
-      }
-
-      console.log("Updating order status for order ID: ", orderId);
-      // If already picked up, this is a delivery - update backend
-      await updateOrderStatus(orderId);
-
-      // Update local state after successful backend update
-      setOrders((prev) =>
-        prev.map((o) => {
-          if (o.id !== orderId) return o;
-          return { ...o, isPickedUp: true, isFulfilled: true, status: "DELIVERED" };
-        })
-      );
-
-      // Refresh stats after delivery
       const user = await getCurrentUser();
-      const updatedStats = await fetchDriverDashboard(user.username);
-      setStats(updatedStats);
+
+      await updateOrderStatus(orderId, "Picked Up", user.username);
+
+      // 🔁 Force refresh (as requested)
+      window.location.reload();
 
     } catch (err) {
-      console.error("Error updating order status:", err);
-      setError("Failed to update order status. Please try again.");
+      console.error(err);
+      setError("Failed to pick up order.");
+    }
+  };
+
+  const handleDeliver = async (orderId) => {
+    try {
+      const user = await getCurrentUser();
+
+      await updateOrderStatus(orderId, "Delivered", user.username);
+
+      // 🔁 Force refresh (as requested)
+      window.location.reload();
+
+    } catch (err) {
+      console.error(err);
+      setError("Failed to deliver order.");
     }
   };
 
@@ -75,19 +76,11 @@ const DriverDashboard = () => {
   }
 
   return (
-    <div className="dashboard-page">
-      {/* Header */}
-      <div className="dashboard-header">
-        <h1>Driver Dashboard</h1>
+    <div className="driver-dashboard-page">
 
-        <div className="header-actions">
-          <button className="nav-button">Go Offline</button>
-          <button className="logout-button">Logout</button>
-        </div>
-      </div>
-
-      {/* Stats */}
+      {/* ---------------- Stats ---------------- */}
       <div className="dashboard-stats">
+
         <div className="stat-card">
           <h3>Total Deliveries</h3>
           <p className="stat-number">{stats.totalDeliveries}</p>
@@ -98,69 +91,95 @@ const DriverDashboard = () => {
           <p className="stat-number">${stats.totalEarning}</p>
         </div>
 
-        <div className="stat-card">
-          <h3>Average Rating</h3>
-          <p className="stat-number">{stats.averageRating} ⭐</p>
-        </div>
-
-        <div className="stat-card">
-          <h3>Active Orders</h3>
-          <p className="stat-number">{stats.activeOrders}</p>
-        </div>
       </div>
 
-      {/* Orders */}
-        <div className="orders-container">
-          <div className="orders-header">
-            <h1>Assigned Orders</h1>
-          </div>
 
-          <div className="orders-list">
-            {orders.map((order) => (
-              <div
-                key={order.id}
-                className={`order-card ${
-                  order.status === "PENDING" ? "pending" : "completed"
-                }`}
-              >
-                <div className="order-header">
-                  <div className="order-title">
-                    <h3>Order #{order.id}</h3>
-                  </div>
-
-                  <span
-                    className={`status-badge ${
-                      order.isFulfilled === false
-                        ? "pending"
-                        : "fulfilled"
-                    }`}
-                  >
-                    {order.status}
-                  </span>
+      <div className="order-wrapper">
+          {/* ---------------- Active Orders ---------------- */}
+          <section className="orders-section active">
+              <div className="orders-container">
+                <div className="orders-header">
+                  <h2>Active Orders</h2>
                 </div>
 
-                <div className="order-summary">
-
-                  <div className="summary-item">
-                    <span className="label">Earnings</span>
-                    <span className="value">${order.earnings}</span>
-                  </div>
-                </div>
-
-                 {!order.isFulfilled ? (
-                    <button
-                      className="fulfill-button"
-                      onClick={() => handlePickupOrDeliver(order.id)}
-                    >
-                      {!order.isPickedUp ? "Pick up" : "Mark as Delivered"}
-                    </button>
+                <div className="orders-list">
+                  {activeOrders.length === 0 ? (
+                    <p>No active orders.</p>
                   ) : (
-                    <div className="fulfilled-badge">Completed</div>
+                    activeOrders.map((order) => (
+                      <div key={order.id} className="order-card active">
+
+                        <div className="order-header">
+                          <h3>Order #{order.id}</h3>
+                          <span className="status-badge active">
+                            PICKED UP
+                          </span>
+                        </div>
+
+                        <div className="order-summary">
+                          <div className="summary-item">
+                            <span className="label">Earnings</span>
+                            <span className="value">${order.deliveryCost}</span>
+                          </div>
+                        </div>
+
+                        <button
+                          className="fulfill-button"
+                          onClick={() => handleDeliver(order.id)}
+                        >
+                          Mark as Delivered
+                        </button>
+
+                      </div>
+                    ))
                   )}
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
+          </section>
+
+          {/* ---------------- Available Orders ---------------- */}
+        <section className="orders-section available">
+            <div className="orders-container">
+              <div className="orders-header">
+                <h2>Available Orders</h2>
+              </div>
+
+              <div className="orders-list">
+                {availableOrders.length === 0 ? (
+                  <p>No available orders.</p>
+                ) : (
+                  availableOrders.map((order) => (
+                    <div key={order.id} className="order-card pending">
+
+                      <div className="order-header">
+                        <h3>Order #{order.id}</h3>
+                        <span className="status-badge pending">
+                          PLACED
+                        </span>
+                      </div>
+
+                      <div className="order-summary">
+                        <div className="summary-item">
+                          <span className="label">Earnings</span>
+                          <span className="value">${order.deliveryCost}</span>
+                        </div>
+                      </div>
+
+                      <button
+                        className="fulfill-button"
+                        onClick={() => handlePickUp(order.id)}
+                      >
+                        Pick Up
+                      </button>
+
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+        </section>
+
+       </div>
     </div>
   );
 };

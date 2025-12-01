@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
@@ -22,6 +23,7 @@ public class DriverStatsImpl implements DriverStatsService {
     @Autowired
     private DriverStatsRepository driverStatsRepository;
 
+    @Override
     public DriverStatsDto getDriverStats(String username){
         logger.info("Getting driver stats for username: {}", username);
         Optional<DriverStats> driverStats = driverStatsRepository.findByUsername(username);
@@ -30,5 +32,19 @@ public class DriverStatsImpl implements DriverStatsService {
             return null;
         }
         return DriverStatsMapper.mapToDriverStatsDto(driverStats.get());
+    }
+
+    @Override
+    public void updateTotalEarnings(String username, BigDecimal earnings){
+        logger.info("Updating total earning by: {}", earnings);
+        Optional<DriverStats> optionalDriverStats = driverStatsRepository.findByUsername(username);
+        if(optionalDriverStats.isEmpty()){
+            logger.info("The user {} does not exist in the database", username);
+            return;
+        }
+        DriverStats driverStats = optionalDriverStats.get();
+        driverStats.setTotalEarnings(driverStats.getTotalEarnings().add(earnings));
+        driverStats.setTotalDeliveries(driverStats.getTotalDeliveries() + 1);
+        driverStatsRepository.save(driverStats);
     }
 }
