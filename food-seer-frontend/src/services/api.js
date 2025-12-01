@@ -49,23 +49,22 @@ export const login = async (username, password) => {
   }
 };
 
-export const register = async (username, email, password) => {
+export const register = async (username, email, password, role) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
-      method: 'POST',
-      headers: createHeaders(false),
-      body: JSON.stringify({ username, email, password }),
-    });
-    
-    if (!response.ok) {
-      throw new Error('Registration failed');
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Registration error:', error);
-    throw error;
-  }
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: createHeaders(false),
+        body: JSON.stringify({ username, email, password, role }),
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error);
+      }
+      return await response.json();
+   } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+   }
 };
 
 export const logout = () => {
@@ -498,3 +497,73 @@ export const rateFoodItem = async (orderId, foodId, rating) => {
   }
 };
 
+export const fetchDriverDashboard = async (user) => {
+  const response = await fetch(`${API_BASE_URL}/api/driverStats?username=${encodeURIComponent(user)}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch driver dashboard data");
+  }
+
+  return await response.json();
+};
+
+export const updateOrderStatus = async (orderId, status, username) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
+      method: 'POST',
+      headers: createHeaders(true),
+      body: JSON.stringify({username, status}),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to update order status');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Update order status error:', error);
+    throw error;
+  }
+};
+
+export const getAvailableOrders = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/orders/availableOrders`, {
+      method: 'GET',
+      headers: createHeaders(true),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch unfulfilled orders');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Get unfulfilled orders error:', error);
+    throw error;
+  }
+};
+
+export const getActiveOrders = async (username) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/orders/activeOrders/${username}`, {
+      method: 'GET',
+      headers: createHeaders(true),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch active orders');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Get active orders error:', error);
+    throw error;
+  }
+};

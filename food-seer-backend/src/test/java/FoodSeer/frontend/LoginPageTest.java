@@ -122,7 +122,7 @@ public class LoginPageTest {
      * - There are no errors for empty fields
      */
     @Test
-    public void testPartialCredentials() {  
+    public void testPartialCredentials() {
         attemptLogin(adminUsername, "");
 
         // Assert login failed by checking we are still on the login page
@@ -172,7 +172,7 @@ public class LoginPageTest {
         passwordField.sendKeys(password);
 
         // Click login button
-        
-        loginButton.click();        
+
+        loginButton.click();
     }
 }

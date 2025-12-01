@@ -29,6 +29,7 @@ const Navigation = () => {
   const isAdmin = user?.role === 'ROLE_ADMIN';
   const isStaff = user?.role === 'ROLE_STAFF' || isAdmin;
   const isStandardUser = user?.role === 'ROLE_CUSTOMER';
+  const isDriver = user?.role === 'ROLE_DRIVER';
 
   const handleBrandClick = () => {
     if (isStaff) {
@@ -45,7 +46,7 @@ const Navigation = () => {
           🍽️ FoodSeer
         </div>
 
-        <button 
+        <button
           className="nav-toggle"
           onClick={() => setMenuOpen(!menuOpen)}
         >
@@ -146,22 +147,34 @@ const Navigation = () => {
             )}
 
             {/* Admin-only menu items */}
-             {isAdmin && (
+            {isAdmin && (
               <>
-              <button
-                className={`nav-link admin ${location.pathname === '/users' ? 'active' : ''}`}
-                onClick={() => {
-                navigate('/users');
-                setMenuOpen(false);
-            }}
-            >
-            👥 User Management
-             </button>
-           </>
-          
-          )}
+                <button
+                  className={`nav-link admin ${location.pathname === '/users' ? 'active' : ''}`}
+                  onClick={() => {
+                    navigate('/users');
+                    setMenuOpen(false);
+                  }}
+                >
+                  👥 User Management
+                </button>
+              </>
+            )}
 
-
+            {/* Driver-only menu item */}
+            {isDriver && (
+              <>
+                <button
+                  className={`nav-link driver ${location.pathname === '/driver-dashboard' ? 'active' : ''}`}
+                  onClick={() => {
+                    navigate('/driver-dashboard');
+                    setMenuOpen(false);
+                  }}
+                >
+                  🚚 Driver Dashboard
+                </button>
+              </>
+            )}
           </div>
 
           <div className="nav-user">
@@ -186,4 +199,3 @@ const Navigation = () => {
 };
 
 export default Navigation;
-

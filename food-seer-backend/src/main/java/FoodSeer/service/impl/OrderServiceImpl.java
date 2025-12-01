@@ -3,8 +3,15 @@ package FoodSeer.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import FoodSeer.dto.DriverStatsDto;
+import FoodSeer.entity.DriverStats;
+import FoodSeer.mapper.DriverStatsMapper;
+import FoodSeer.service.DriverStatsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +34,7 @@ import FoodSeer.service.UserService;
 @Service
 public class OrderServiceImpl implements OrderService {
 
+    Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
     /** Repository for food items. */
     @Autowired
     private FoodRepository foodRepository;
@@ -42,6 +50,9 @@ public class OrderServiceImpl implements OrderService {
     /** User service for getting current user. */
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private DriverStatsService driverStatsService;
 
     /**
      * Creates an order with the given information.
@@ -64,6 +75,9 @@ public class OrderServiceImpl implements OrderService {
         order.setName(orderDto.getName());
         order.setFoods(foods);
         order.setIsFulfilled(false);
+        order.setCost(orderDto.getCost());
+        order.setStatus(orderDto.getStatus());
+        order.setDeliveryCost(orderDto.getDeliveryCost());
         
         // Set the current user as the owner of this order
         final User currentUser = userService.getCurrentUser();
@@ -243,5 +257,44 @@ public class OrderServiceImpl implements OrderService {
         
         final List<Order> orders = orderRepository.findByUserAndIsFulfilled(currentUser, false);
         return orders.stream().map(OrderMapper::mapToOrderDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public OrderDto updateOrder(final Long orderId, String username, String status){
+        Optional<Order> orderList = orderRepository.findById(orderId);
+
+        if(orderList.isEmpty()){
+            logger.info("Order with id {} does not exist", orderId);
+            return null;
+        }
+
+        Order order = orderList.get();
+        order.setStatus(status);
+
+        if(status.equals("Picked Up")){
+            order.setDriver(DriverStatsMapper.mapToDriverStats(driverStatsService.getDriverStats(username)));
+        }
+
+        if ((status.equals("Delivered")) && order.getDriver().getUsername().equals(username)) {
+            order.setIsFulfilled(true);
+            driverStatsService.updateTotalEarnings(username, order.getDeliveryCost());
+        } else {
+            order.setIsFulfilled(false);
+        }
+
+        orderRepository.save(order);
+        return OrderMapper.mapToOrderDto(order);
+    }
+
+    @Override
+    public List<OrderDto> getAvailableOrders(){
+        List<Order> availableOrders = orderRepository.findByStatus("Placed");
+        return availableOrders.stream().map(OrderMapper::mapToOrderDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<OrderDto> getActiveOrders(String username){
+        List<Order> activeOrders = orderRepository.findByDriverUsernameAndStatus(username, "Picked Up");
+        return activeOrders.stream().map(OrderMapper::mapToOrderDto).collect(Collectors.toList());
     }
 }

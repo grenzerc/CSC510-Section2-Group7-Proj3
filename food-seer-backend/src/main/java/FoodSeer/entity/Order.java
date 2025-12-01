@@ -1,19 +1,12 @@
 package FoodSeer.entity;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 /**
  * Represents an Order in the FoodSeer system.
@@ -42,6 +35,30 @@ public class Order {
 
     /** Boolean used to track if the order has been fulfilled */
     private boolean isFulfilled;
+
+    private BigDecimal cost;
+
+    private String status;
+
+    private BigDecimal rating;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "driver_username",
+            referencedColumnName = "username",
+            foreignKey = @ForeignKey(name = "fk_orders_driver")
+    )
+    private DriverStats driver;
+
+    private BigDecimal deliveryCost;
+
+    public BigDecimal getCost() {
+        return cost;
+    }
+
+    public void setCost(BigDecimal cost) {
+        this.cost = cost;
+    }
 
     /**
      * A set of Food IDs that have already been rated in this order.
@@ -86,7 +103,7 @@ public class Order {
      * @param id the order ID
      */
     @SuppressWarnings("unused")
-    private void setId(final Long id) {
+    public void setId(final Long id) {
         this.id = id;
     }
 
@@ -208,5 +225,37 @@ public class Order {
      */
     public boolean hasFoodBeenRated(final Long foodId) {
         return this.ratedFoodIds.contains(foodId);
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public BigDecimal getRating() {
+        return rating;
+    }
+
+    public void setRating(BigDecimal rating) {
+        this.rating = rating;
+    }
+
+    public DriverStats getDriver() {
+        return driver;
+    }
+
+    public void setDriver(DriverStats driver) {
+        this.driver = driver;
+    }
+
+    public BigDecimal getDeliveryCost() {
+        return deliveryCost;
+    }
+
+    public void setDeliveryCost(BigDecimal deliveryCost) {
+        this.deliveryCost = deliveryCost;
     }
 }

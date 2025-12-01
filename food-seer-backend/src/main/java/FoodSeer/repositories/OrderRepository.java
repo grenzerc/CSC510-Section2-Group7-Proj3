@@ -43,4 +43,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      */
     @Query("SELECT o FROM Order o JOIN o.foods f WHERE f = :food")
     List<Order> findOrdersContainingFood(@Param("food") Food food);
+
+    List<Order> findByStatus(String status);
+
+    List<Order> findByDriverUsernameAndStatus(@Param("username") String username, @Param("status") String status);
 }

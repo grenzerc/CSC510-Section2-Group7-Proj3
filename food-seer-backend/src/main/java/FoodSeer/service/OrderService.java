@@ -80,4 +80,10 @@ public interface OrderService {
      * @return a list of unfulfilled orders belonging to the current user
      */
     List<OrderDto> getCurrentUserUnfulfilledOrders();
+
+    OrderDto updateOrder(final Long id, String username, String status);
+
+    List<OrderDto> getAvailableOrders();
+
+    List<OrderDto> getActiveOrders(String username);
 }

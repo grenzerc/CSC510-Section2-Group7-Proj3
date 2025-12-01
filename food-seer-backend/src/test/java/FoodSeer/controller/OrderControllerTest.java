@@ -85,6 +85,14 @@ class OrderControllerTest {
                 .build();
         userRepository.save(staff);
 
+        final User driver = User.builder()
+                .username("driver")
+                .email("driver@test.com")
+                .password("password")
+                .role("ROLE_DRIVER")
+                .build();
+        userRepository.save(driver);
+
         // Create initial inventory
         final List<Food> foods = new ArrayList<>();
         final Food coffee = new Food("Coffee", 20, 10, List.of("CAFFEINE"));
@@ -119,10 +127,10 @@ class OrderControllerTest {
                 .andExpect(status().isOk());
 
         mvc.perform(post("/api/orders")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtils.asJsonString(orderDto))  // <-- directly send the DTO
-                .accept(MediaType.APPLICATION_JSON))
-            	.andExpect(status().isOk())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.asJsonString(orderDto))  // <-- directly send the DTO
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -167,7 +175,7 @@ class OrderControllerTest {
         mvc.perform(get("/api/orders/unfulfilledOrders"))
                 .andExpect(status().isOk());
     }
-    
+
     @Test
     @Transactional
     @WithMockUser(username = "staff", roles = "STAFF")
@@ -175,9 +183,9 @@ class OrderControllerTest {
         OrderDto fake = new OrderDto(999L, "FakeOrder");
 
         mvc.perform(post("/api/orders/fulfillOrder")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtils.asJsonString(fake)))
-            .andExpect(status().isPreconditionFailed()); // 412
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.asJsonString(fake)))
+                .andExpect(status().isPreconditionFailed()); // 412
     }
 
     @Test
@@ -196,12 +204,12 @@ class OrderControllerTest {
         orderRepository.save(entity);
 
         mvc.perform(post("/api/orders/fulfillOrder")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtils.asJsonString(saved)))
-            .andExpect(status().isGone()); // 410
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.asJsonString(saved)))
+                .andExpect(status().isGone()); // 410
     }
 
-    
+
     @Test
     @Transactional
     @WithMockUser(username = "staff", roles = "STAFF")
@@ -215,9 +223,9 @@ class OrderControllerTest {
         OrderDto saved = orderService.createOrder(o);
 
         mvc.perform(post("/api/orders/fulfillOrder")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtils.asJsonString(saved)))
-            .andExpect(status().isBadRequest()); // 400
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.asJsonString(saved)))
+                .andExpect(status().isBadRequest()); // 400
     }
 
     @Test
@@ -225,30 +233,30 @@ class OrderControllerTest {
     @WithMockUser(username = "customer", roles = "CUSTOMER")
     void testGetOrder_NotFound() throws Exception {
         mvc.perform(get("/api/orders/999"))
-           .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound());
     }
 
     @Test
     @Transactional
     void testGetMyOrders_Unauthorized() throws Exception {
         mvc.perform(get("/api/orders/my-orders"))
-            .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test
     @Transactional
     void testGetMyFulfilledOrders_Unauthorized() throws Exception {
         mvc.perform(get("/api/orders/my-orders/fulfilled"))
-            .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test
     @Transactional
     void testGetMyUnfulfilledOrders_Unauthorized() throws Exception {
         mvc.perform(get("/api/orders/my-orders/unfulfilled"))
-            .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
-    
+
     @Test
     @Transactional
     @WithMockUser(username = "customer", roles = "CUSTOMER")
@@ -261,10 +269,10 @@ class OrderControllerTest {
         orderService.createOrder(orderDto);
 
         mvc.perform(get("/api/orders/my-orders"))
-            .andExpect(status().isOk());
+                .andExpect(status().isOk());
     }
 
-    
+
     @Test
     @Transactional
     @WithMockUser(username = "customer", roles = "CUSTOMER")
@@ -282,10 +290,10 @@ class OrderControllerTest {
         orderRepository.save(entity);
 
         mvc.perform(get("/api/orders/my-orders/fulfilled"))
-            .andExpect(status().isOk());
+                .andExpect(status().isOk());
     }
 
-    
+
     @Test
     @Transactional
     @WithMockUser(username = "customer", roles = "CUSTOMER")
@@ -298,6 +306,55 @@ class OrderControllerTest {
         orderService.createOrder(orderDto);
 
         mvc.perform(get("/api/orders/my-orders/unfulfilled"))
-            .andExpect(status().isOk());
+                .andExpect(status().isOk());
+    }
+
+    // --- Missing tests added below ---
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "driver", roles = "DRIVER")
+    void testGetAvailableOrders() throws Exception {
+        final List<Food> foods = foodRepository.findAll();
+        final OrderDto orderDto = new OrderDto(0L, "AvailableOrderTest");
+        orderDto.setFoods(foods.subList(0, 1));
+        orderService.createOrder(orderDto);
+
+        mvc.perform(get("/api/orders/availableOrders"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "driver", roles = "DRIVER")
+    void testGetActiveOrders_ForDriver() throws Exception {
+        final List<Food> foods = foodRepository.findAll();
+        final OrderDto orderDto = new OrderDto(0L, "ActiveOrderTest");
+        orderDto.setFoods(foods.subList(0, 1));
+        final OrderDto saved = orderService.createOrder(orderDto);
+
+        // Mark order as picked up by driver via service so it appears as active
+        orderService.updateOrder(saved.getId(), "driver", "PICKED_UP");
+
+        mvc.perform(get("/api/orders/activeOrders/driver"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Transactional
+    @WithMockUser(username = "driver", roles = "DRIVER")
+    void testUpdateOrderStatus_AsDriver() throws Exception {
+        final List<Food> foods = foodRepository.findAll();
+        final OrderDto orderDto = new OrderDto(0L, "UpdateStatusTest");
+        orderDto.setFoods(foods.subList(0, 1));
+        final OrderDto saved = orderService.createOrder(orderDto);
+
+        // Send update payload (username + status)
+        String payload = "{\"username\":\"driver\",\"status\":\"PICKED_UP\"}";
+
+        mvc.perform(post("/api/orders/" + saved.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isOk());
     }
 }
