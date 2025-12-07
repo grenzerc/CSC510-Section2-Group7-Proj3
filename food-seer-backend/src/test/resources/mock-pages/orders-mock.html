@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Mock Orders Page</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .order-card { border: 1px solid #ddd; padding: 12px; margin-bottom: 10px; }
+    .food-item-row { display:flex; justify-content:space-between; align-items:center; }
+  </style>
+</head>
+<body>
+  <h1>My Orders (Mock)</h1>
+
+  <div class="order-card" id="order-1">
+    <div class="order-header"><strong>Order #1</strong> <span class="status">✓ Fulfilled</span></div>
+    <div class="order-items">
+      <div class="food-item-row" id="food-100">
+        <div class="food-info-left">
+          <span class="food-name">Test Food</span>
+        </div>
+        <div class="food-rating-right">
+          <select id="rating-select-100">
+            <option value="5">5 ★</option>
+            <option value="4">4 ★</option>
+            <option value="3">3 ★</option>
+            <option value="2">2 ★</option>
+            <option value="1">1 ★</option>
+          </select>
+          <button id="rate-btn-100">Rate</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('rate-btn-100').addEventListener('click', function () {
+      // Simulate backend success: show alert and disable button
+      alert('Rating submitted successfully');
+      const btn = document.getElementById('rate-btn-100');
+      btn.textContent = 'Rated ✅';
+      btn.disabled = true;
+    });
+  </script>
+</body>
+</html>
