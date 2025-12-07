@@ -1,9 +1,0 @@
-This is our 3rd meeting.
-Each member discussed what they worked on since last time and what they are currently working on
-  Chase: Still hasn't been able to get the number of backend test up. Worked on setting up GitHub Actions so that our test suite will keep working. Also, restructured the repo to get some of the GitHub actions to work alongside GitHub badges.
-  Justin: GitHub badges now all work and seem to work. Need to rework some of the documentation as somethings have changed since the original were made. 
-  Andrew: Added the backend for the AI chatbot. Needs to run some tests to ensure that it works as intended. Plans to make some front end tests.
-  Mukul: Got the entire frontend coded out and it looks great. Plans on implementing the AI chatbot on the front end.
-
-We plan our next meeting for the 30th.
-All members seem to be making consistent progress to the milestones. We expect the project to be done with tests without the AI by the 30th. The AI is slowly becoming a stretch goal but we are trying to get it implemented.
