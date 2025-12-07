@@ -67,10 +67,10 @@ This guide will help you set up and run the FoodSeer application.
 | @testing-library/user-event | 13.5.0  | MIT        | ✅ (tests) | [https://testing-library.com](https://testing-library.com)                                   |
 
 
-| Tool               | Version | License              | Required? | URL                                                        |
-| ------------------ | ------- | -------------------- | --------- | ---------------------------------------------------------- |
-| Ollama             | latest  | MIT                  | ✅        | [https://ollama.com]                                      |
-| qwen2.5:1.5b Model | latest  | Google Gemma License | ✅        | [https://ollama.com/library/qwen2.5:1.5b]                 |
+| Tool               | Version | License                     | Required? | URL                                                        |
+| ------------------ | ------- | --------------------------- | --------- | ---------------------------------------------------------- |
+| Ollama             | latest  | MIT                         | ✅        | [https://ollama.com]                                      |
+| qwen2.5:1.5b Model | latest  | Apache License Version 2.0  | ✅        | [https://ollama.com/library/qwen2.5:1.5b]                 |
 
 
 | Language | Tool         | Command                  |
@@ -536,6 +536,7 @@ npm start
 # http://localhost:3000
 # Login: admin / admin123
 ```
+
 
 
 
