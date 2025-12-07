@@ -1,8 +1,8 @@
 # Welcome to *Food Seer* Contributing Guide
 
-We're thrilled you're interested in contributing to our [project](https://github.com/NovaCorz/CSC510)! This guide outlines the steps for getting involved, from submitting issues to crafting and merging pull requests.
+We're thrilled you're interested in contributing to our [project](https://github.com/rishi082000/CSC510-Section2-Group7-Proj3)! This guide outlines the steps for getting involved, from submitting issues to crafting and merging pull requests.
 
-Before you begin, please take a moment to read our [Code of Conduct](https://github.com/NovaCorz/CSC510/blob/main/CODE_OF_CONDUCT.md). It’s essential for fostering a respectful, inclusive, and collaborative community.
+Before you begin, please take a moment to read our [Code of Conduct](https://github.com/rishi082000/CSC510-Section2-Group7-Proj3/blob/main/CODE_OF_CONDUCT.md). It’s essential for fostering a respectful, inclusive, and collaborative community.
 
 ---
 
@@ -17,14 +17,14 @@ Before you begin, please take a moment to read our [Code of Conduct](https://git
 ## How Can I Contribute?
 
 #### 1. Discuss Changes
-- Before making any changes, please share your idea with the project maintainers. You can do this by opening a [new issue](https://github.com/NovaCorz/CSC510/issues), sending an email, or contacting the team through the channels listed in the [README](https://github.com/NovaCorz/CSC510/blob/main/README.md).
+- Before making any changes, please share your idea with the project maintainers. You can do this by opening a [new issue](https://github.com/rishi082000/CSC510-Section2-Group7-Proj3/issues), sending an email, or contacting the team through the channels listed in the [README](https://github.com/rishi082000/CSC510-Section2-Group7-Proj3/blob/main/README.md).
 
 #### 2. Creating Issues
-- Before filing a new issue, take a moment to review the [existing issue list](https://github.com/NovaCorz/CSC510/issues) to avoid duplicates.
+- Before filing a new issue, take a moment to review the [existing issue list](https://github.com/rishi082000/CSC510-Section2-Group7-Proj3/issues) to avoid duplicates.
 - If you're reporting a bug, please use the provided bug report template and include as much detail as possible to help us reproduce and resolve the problem efficiently.
 
 #### 3. Addressing Code of Conduct Violations
-- If you witness or experience behavior that breaches our Code of Conduct, please notify the project maintainers. Contact information is available in the [README](https://github.com/NovaCorz/CSC510/blob/main/README.md).
+- If you witness or experience behavior that breaches our Code of Conduct, please notify the project maintainers. Contact information is available in the [README](https://github.com/rishi082000/CSC510-Section2-Group7-Proj3/blob/main/README.md).
 
 ---
 
