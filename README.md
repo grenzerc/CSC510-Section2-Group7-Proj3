@@ -67,20 +67,25 @@ Food Seer bridges **AI-driven personalization** with **restaurant efficiency** �
 
 ---
 
-## 📈 Use Case
+## 📈 Use Cases
 
-**Scenario:** Sarah is tired after work and doesn't want to decide what to eat.
+### 1. User
+The core customer experience centers on choice and feedback.
+* **Direct Ordering:** Users can order food directly by filtering based on **allergies** and **food ratings**.
+* **AI Chatbot:** Users can interact with an improved AI chatbot to receive personalized meal recommendations.
+* **Mood Quiz:** Users can take a quick interactive quiz to get recommendations based on their current mood.
+* **Rating System:** Once food is delivered, users can rate their meal to provide feedback.
 
-### How Food Seer Helps
+### 2. Admin
+Admins manage the platform using two specific dashboards.
+* **Order Dashboard:** Admins can view all incoming orders and mark them as **fulfilled**.
+* **Food Dashboard:** Admins can manage the food inventory and update stock levels/menu items.
 
-1. Sarah opens Food Seer  
-2. She chooses between:  
-   - a **quick interactive quiz**, or  
-   - chatting with our **Ollama-powered chatbot**  
-3. She instantly receives a personalized meal recommendation  
-4. With one click, she can place an order — no browsing required  
-
-Food Seer transforms meal choices from a chore into a simple, enjoyable interaction.
+### 3. Driver
+Drivers have autonomy over their deliveries and earnings visibility.
+* **Order Selection:** Drivers can view available orders along with the specific **compensation** for each.
+* **Delivery Workflow:** Drivers can choose to accept an order and, upon completion, mark it as **delivered**.
+* **Earnings:** Drivers can view their **total compensation** accrued over time.
 
 ---
 
