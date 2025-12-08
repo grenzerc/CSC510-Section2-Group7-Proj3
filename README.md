@@ -120,8 +120,7 @@ To set up the project locally, follow these steps.
 
 **Clone the Repository:**
 ```bash
-git clone https://github.com/NovaCorz/CSC510.git
-cd CSC510
+git https://github.com/rishi082000/CSC510-Section2-Group7-Proj3.git
 ```
 Choose Your Installation Method. Detailed instructions are available in [INSTALL.md](INSTALL.md).
 
