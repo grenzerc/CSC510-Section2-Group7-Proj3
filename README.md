@@ -187,16 +187,16 @@ For more details on contributing to Food Seer, please read our full guide here: 
 
 We're excited about the enhancements coming to Food Seer! Here's what's next:
 
-- **Integrate Maps and Live Order Location**
+- **Integrate Maps and Live Order Location:**
   Incorporate real-time location tracking that could help customers stay informed about where their order is and provide admins with clearer delivery visibility.
 
-- **Introduce Driver Ratings**
+- **Introduce Driver Ratings:**
   Allow both admins and customers to rate drivers on delivery time, service quality, and overall experience could help maintain a reliable and professional delivery ecosystem.
 
-- **Support Multi-Order Pickup for Nearby Deliveries**
+- **Support Multi-Order Pickup for Nearby Deliveries:**
    Give drivers the option to accept multiple orders within close proximity might streamline delivery routes and reduce wait times. 
 
-- **Voice-Enabled Chat Experience**  
+- **Voice-Enabled Chat Experience:**  
   Add speech-to-text and text-to-speech so users can talk to the chatbot like a real waiter and receive spoken, natural meal recommendations — making the experience hands-free and more conversational.
 
 ---
