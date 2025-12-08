@@ -187,14 +187,14 @@ For more details on contributing to Food Seer, please read our full guide here: 
 
 We're excited about the enhancements coming to Food Seer! Here's what's next:
 
-- **Chat-Bot Memory & History**  
-  Allow the AI to retain past conversations, preferences, and recommendations — creating a truly personalized dining assistant that learns over time.
+- **Integrate Maps and Live Order Location**
+  Incorporate real-time location tracking that could help customers stay informed about where their order is and provide admins with clearer delivery visibility.
 
-- **Recommendation Feedback & Improvement Loop**  
-  Enable rating and review features for each recommendation, helping the system continuously refine and improve food suggestions.
+- **Introduce Driver Ratings**
+  Allow both admins and customers to rate drivers on delivery time, service quality, and overall experience could help maintain a reliable and professional delivery ecosystem.
 
-- **Analytics & Insights Dashboard**  
-  Introduce a business-facing analytics suite that visualizes customer preferences, order trends, and engagement insights to support smarter restaurant decisions.
+- **Support Multi-Order Pickup for Nearby Deliveries**
+   Give drivers the option to accept multiple orders within close proximity might streamline delivery routes and reduce wait times. 
 
 - **Voice-Enabled Chat Experience**  
   Add speech-to-text and text-to-speech so users can talk to the chatbot like a real waiter and receive spoken, natural meal recommendations — making the experience hands-free and more conversational.
@@ -209,7 +209,14 @@ A heartfelt thank you to our contributors who made this project possible:
 - [Justin Kuethe](https://github.com/NovaCorz) - jrkuethe  
 - [Chase Goins](https://github.com/jcgoins2) - jcgoins2  
 - [Andrew Parr](https://github.com/afluffybunny15) - aaparr  
-- [Mukul Sauhta](https://github.com/muksaw) - msauhta2  
+- [Mukul Sauhta](https://github.com/muksaw) - msauhta2
+
+**Group #7(Section 2)**
+
+- [Rishi Senthil Kumar](https://github.com/Rish1SK) - rsenthi  
+- [Rishabh Ravi Kumar](https://github.com/rishi082000)- rishabh 
+- [Jagadeshwar Muthukumaran](https://github.com/Jagadesh001ops) - jmuthuk  
+- [Krisha Darji](https://github.com/KrishaDarji) - kdarji
 
 ---
 
@@ -268,41 +275,25 @@ This project is **self-developed and unfunded**, created as part of academic cou
 
 ---
 
-## 🌟 Success Stories
-
-Food Seer has been tested among a small group of users, including friends and classmates, to evaluate its effectiveness in real-world decision-making.  
-During these early trials, users reported that Food Seer:
-
-- Made choosing a meal **faster and less stressful**  
-- Offered **accurate and relevant** suggestions through both quiz and chat modes  
-- Provided a **clean, easy-to-navigate** interface for exploring recommendations  
-
-> “It actually picked something I wanted without me scrolling for 10 minutes.” — Early User
-
----
-
 ## 📎 Recommended Citation
 
 If you use Food Seer in academic work, research, or presentations, please cite our project as follows:
 
 **APA Format**
-> Kuethe, J., Goins, C., Parr, A., & Sauhta, M. (2025). *Food Seer: Smart Meal Recommendation System*. GitHub Repository. https://github.com/NovaCorz/CSC510
+> Senthil Kumar, R. and Ravi kumar, R. and Muthukumaran, J. and Darji, K. (2025). *Food Seer: Smart Meal Recommendation System*. GitHub Repository. https://github.com/rishi082000/CSC510-Section2-Group7-Proj3
 
 **BibTeX**
 ```bibtex
 @software{foodseer2025,
-  author       = {Kuethe, Justin and Goins, Chase and Parr, Andrew and Sauhta, Mukul},
+  author       = {Senthil Kumar, Rishi and Ravi kumar, Rishabh and Muthukumaran, Jagadeshwar and Darji, Krisha},
   title        = {Food Seer: Smart Meal Recommendation System},
   year         = {2025},
   publisher    = {GitHub},
-  url          = {https://github.com/NovaCorz/CSC510},
+  url          = {[https://github.com/rishi082000/CSC510-Section2-Group7-Proj3]},
 }
 ```
 
 ---
-
-## 📋 Project Rubric
-See the full evaluation criteria in the [RUBRIC.md](./RUBRIC.md).
 
 ## ⚠️ Disclaimer
 Food Seer is designed as a smart recommendation system for restaurant delivery services. All meal recommendations are suggestions based on user input and preferences. Individual dietary needs, allergies, and health conditions should always be considered when making food choices. We are not responsible for any adverse reactions or health issues that may arise from following our recommendations.
