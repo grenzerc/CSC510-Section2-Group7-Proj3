@@ -134,7 +134,7 @@ Check out our demo video to see the application in action! Click the link below 
 ---
 
 ## 📊 Project Poster
-Curious about our project? View our project poster showcasing key aspects of the system [here](https://github.com/NovaCorz/CSC510/blob/main/doc/proj2.pdf).
+Curious about our project? View our project poster showcasing key aspects of the system [here](https://github.com/rishi082000/CSC510-Section2-Group7-Proj3/blob/main/doc/Section_2_Group_7_Project_3.pdf).
 
 ---
 
