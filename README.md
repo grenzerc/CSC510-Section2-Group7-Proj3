@@ -257,15 +257,7 @@ This sends alerts for code updates, pull requests, issues, releases, and discuss
 
 ---
 
-## 📅 Roadmap & Funding Information
-
-### Project Roadmap
-Our current development focus covers the **next 3 months**, which includes:
-
-- Enhancing AI memory & personalization  
-- Adding user feedback to refine recommendations  
-- Introducing analytics dashboards for insights  
-- Expanding to a voice-enabled chatbot experience  
+## 📅 Funding Information
 
 ### Funding & Support
 This project is **self-developed and unfunded**, created as part of academic coursework.  
@@ -280,7 +272,7 @@ This project is **self-developed and unfunded**, created as part of academic cou
 If you use Food Seer in academic work, research, or presentations, please cite our project as follows:
 
 **APA Format**
-> Senthil Kumar, R. and Ravi kumar, R. and Muthukumaran, J. and Darji, K. (2025). *Food Seer: Smart Meal Recommendation System*. GitHub Repository. https://github.com/rishi082000/CSC510-Section2-Group7-Proj3
+> Senthil Kumar, R. and Ravi Kumar, R. and Muthukumaran, J. and Darji, K. (2025). *Food Seer: Smart Meal Recommendation System*. GitHub Repository. https://github.com/rishi082000/CSC510-Section2-Group7-Proj3
 
 **BibTeX**
 ```bibtex
