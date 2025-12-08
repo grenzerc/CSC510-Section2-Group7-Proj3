@@ -21,7 +21,7 @@
 
 **VIDEO**
 
-[▶️ Watch the Demo Video](https://github.com/NovaCorz/CSC510/blob/main/doc/DEMO.mkv)
+[▶️ Watch the Demo Video](https://github.com/rishi082000/CSC510-Section2-Group7-Proj3/blob/main/doc/DEMO.mkv)
 
 ---
 
@@ -61,7 +61,8 @@ We built Food Seer to:
 - 🤖 Provide personalized suggestions via **AI chat**  
 - ❓ Offer a quiz-based food recommendation system  
 - 🛒 Streamline ordering into a simple “choose and order” flow  
-- 🧾 Empower staff with inventory, user, and order management tools  
+- 🧾 Empower staff with inventory, user, and order management tools
+- 🚚 Enable drivers to select orders with transparent compensation and earnings tracking
 
 Food Seer bridges **AI-driven personalization** with **restaurant efficiency** — improving both customer experience and backend operations.
 
@@ -129,7 +130,7 @@ Choose Your Installation Method. Detailed instructions are available in [INSTALL
 ## 🎥 Demo Video
 Check out our demo video to see the application in action! Click the link below to watch:
 
-[▶️ Watch the Demo Video](https://github.com/NovaCorz/CSC510/blob/main/doc/DEMO.mkv)
+[▶️ Watch the Demo Video](https://github.com/rishi082000/CSC510-Section2-Group7-Proj3/blob/main/doc/DEMO.mkv)
 
 ---
 
@@ -179,8 +180,7 @@ For more details on contributing to Food Seer, please read our full guide here: 
 ---
 
 ## 📈 Code Coverage
-[![codecov](https://codecov.io/gh/NovaCorz/CSC510/branch/main/graph/badge.svg)](https://codecov.io/gh/NovaCorz/CSC510) It is part of the [Github Workflow Build](https://github.com/NovaCorz/CSC510/actions)
-
+[![codecov](https://codecov.io/gh/rishi082000/CSC510-Section2-Group7-Proj3/branch/main/graph/badge.svg)](https://app.codecov.io/github/rishi082000/CSC510-Section2-Group7-Proj3) 
 ---
 
 ## 🌐 Future Scope
