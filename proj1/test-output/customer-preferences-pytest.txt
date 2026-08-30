@@ -1,0 +1,36 @@
+============================= test session starts =============================
+platform win32 -- Python 3.10.11, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\tierr\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\python.exe
+rootdir: C:\Users\tierr\Documents\CSC510-Section2-Group7-Proj3
+collecting ... collected 4 items
+
+proj1/tests/test_customer_preferences_pytest.py::test_customer_can_update_food_preferences PASSED [ 25%]
+proj1/tests/test_customer_preferences_pytest.py::test_updated_food_preferences_are_returned_in_customer_profile PASSED [ 50%]
+proj1/tests/test_customer_preferences_pytest.py::test_customer_can_save_preferences_without_dietary_restrictions PASSED [ 75%]
+proj1/tests/test_customer_preferences_pytest.py::test_rejects_unsupported_cost_preference FAILED [100%]
+
+================================== FAILURES ===================================
+__________________ test_rejects_unsupported_cost_preference ___________________
+
+    def test_rejects_unsupported_cost_preference():
+        """This checks whether the backend rejects a budget value not offered by the program."""
+        customer, token = create_and_login_customer("invalid_budget_customer")
+    
+        update_status, update_body = api_request(
+            "PUT",
+            "/api/users/me/preferences",
+            {
+                "costPreference": "one-million-dollars",
+                "dietaryRestrictions": "MILK",
+            },
+            token=token,
+        )
+    
+>       assert update_status == 400, update_body
+E       AssertionError: {'id': 18, 'username': 'invalid_budget_customer_fumyczl_ckym', 'email': 'invalid_budget_customer_fumyczl_ckym@example.com', 'role': 'ROLE_CUSTOMER', ...}
+E       assert 200 == 400
+
+proj1\tests\test_customer_preferences_pytest.py:192: AssertionError
+=========================== short test summary info ===========================
+FAILED proj1/tests/test_customer_preferences_pytest.py::test_rejects_unsupported_cost_preference - AssertionError: {'id': 18, 'username': 'invalid_budget_customer_fumyczl_ckym', 'email': 'invalid_budget_customer_fumyczl_ckym@example.com', 'role': 'ROLE_CUSTOMER', ...}
+assert 200 == 400
+========================= 1 failed, 3 passed in 1.52s =========================

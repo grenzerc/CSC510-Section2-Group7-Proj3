@@ -21,7 +21,7 @@ Trigger:
 - A potential driver chooses to make an account.
 
 Main Success Scenario:
-1. Driver accesses the main web page.
+1. Driver accesses the recommendation web page.
 2. Driver clicks the register button.
 3. Driver enters username, email, password, and password confirmation.
 4. Driver selects Driver as the role.
@@ -49,3 +49,47 @@ Postconditions:
 - New driver's account exists with the proper role.
 - The account can be logged into and accessed.
 - Relevant statistics and dashboard information can be accessed.
+
+
+
+
+## Use Case #2
+
+Part: Content
+
+Name: Update Food Preferences
+
+Primary Actor: Customer
+
+Stakeholders and Interests:
+- Company: Needs to associate preferences with correct account
+- Customers: Wants current cost and preferences to be saved
+
+Preconditions:
+- The customer already has an existing Food Seer account and is authenticated
+
+Trigger:
+- The customer chooses to view or modify preferences
+
+Main Success Scenario:
+1. The system gets the customer's existing food preferences and restrictions
+2. System shows existing preferences and restrictions to customer
+3. Customer changes preferences and/or restrictions
+4. Customer submits changes
+5. System identifies customer using authenticated account
+6. System updates and saves changes
+7. System redirectes to recommendation page
+
+
+Extensions:
+- 1a. Exisiting preferences can't be retried
+- 3a. Customer submits an unsupported prefence, system rejects value
+- 3b. Customer submits no dietary restrictions, restrictions become an empty value
+- 4a. Change request fails, system informs customer that changes could not be saved
+- 5a. Customer can't be authenticated, system rejects the update
+- 5b. No account matches the username, system returns a not-found response
+
+
+Postconditions:
+- If success: Submitted preferences and/or dietary restrictions are stored in customer's account, customer redirected to recommendation page
+- If fail: Not prefereces or dietary restrictions updated, customer not redirected to recommndation page

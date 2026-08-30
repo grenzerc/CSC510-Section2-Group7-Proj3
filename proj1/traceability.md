@@ -9,3 +9,12 @@
 
 Current finding:
 - Extension 5a exposes a backend defect. The `users.email` column is unique, but registration does not check `existsByEmail` before saving, so duplicate email registration returns HTTP 500 instead of a user-facing validation error.
+
+
+| Use Case #2 | Main success scenario: authenticated customer updates cost and dietary preferences | `test_customer_can_update_food_preferences` |
+| Use Case #2 | Postcondition: updated preferences persist and can be retrieved | `test_updated_food_preferences_are_returned_in_customer_profile` |
+| Use Case #2 | Extension 3a: unsupported cost preference is rejected | `test_rejects_unsupported_cost_preference` |
+| Use Case #2 | Extension 3b: customer selects no dietary restrictions | `test_customer_can_save_preferences_without_dietary_restrictions` |
+
+Current Finding:
+- Use Case #2 exposes missing server-side cost-preference validation. The frontend offers only `budget`, `moderate`, `premium`, and `no-limit`, but the backend accepts and persists an unsupported value and returns HTTP 200.
