@@ -91,7 +91,7 @@ Postconditions:
 
 ## Use Case #3
 Part: Registration Error Handling
-Name: User receives a specific error message on frontend based on how account registration fails
+Name: User receives a specific error message based on how account registration fails
 Primary actor: User
 Stakeholders & interests:
     New users: Need information on why their registration attempt failed
@@ -136,15 +136,50 @@ Postconditions:
     4. User remains on the registration form and is able to edit it and submit again
 
 ## Use Case #4
-Part:
-Name:
-Primary actor:
+Part: Login Redirection
+Name: Login redirects user successfully based on user's role
+Primary actor: User
 Stakeholders & interests:
+    User: wants to reach the correct page for their role after logging in
+    Admin: wants users to access only content appropriate for their role
+    Business: want users to have the correct workflow in a secure way
 Preconditions:
-Trigger:
+    1. Frontend and backend are working correctly
+    2. User already has a registered account
+    3. User not logged in
+    4. User associated with a valid role(staff, admin, customer, driver)
+Trigger: User submits valid login
 Main success scenario:
+        1. User acceses the login page
+        2. User enters valid username and password
+        3. User submits login form
+        4. User's form is authenticated
+        5. System identifies user's role
+        6. Frontend redirects user to the correct page for their role
+        7. User sees the dashboard appropriate to their role
 Extensions:
+        2a. User enters invalid username or password
+            Login is rejected and an error message stating an incorrect username or password was entered is displayed
+        4a. Backend authentication is unavailable
+            Error message is displayed and user is not redirected
+        5a. User account not associated with a role
+            Error message displayed, user is not redirected to a dashboard
+        6a. User is assigned to admin role
+            User is redirected to admin dashboard
+        6b. User is assigned to staff role
+            User is redirected to staff dashboard
+        6c. User is assigned to driver role
+            User is redirected to driver dashboard
+        6d. User is assigned to customer role
+            User is redirected to customer dashboard
+        6e. User is redirected to the wrong page for their role
+            User loses access to desired features, system should redirect them correctly or deny access
 Postconditions:
+  1. User is authenticated
+  2. User session is stored by the frontend
+  3. User is redirected to page appropriate to their role
+  4. User can access features for their role
+  5. User is prevented from accessing pages outside their role permissions
 
 ## Use Case #5
 Part:
