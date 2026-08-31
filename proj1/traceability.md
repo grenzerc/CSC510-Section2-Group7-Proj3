@@ -9,3 +9,5 @@
 
 Current finding:
 - Extension 5a exposes a backend defect. The `users.email` column is unique, but registration does not check `existsByEmail` before saving, so duplicate email registration returns HTTP 500 instead of a user-facing validation error.
+
+
