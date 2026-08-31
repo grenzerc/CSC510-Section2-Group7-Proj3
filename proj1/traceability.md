@@ -31,3 +31,10 @@ Current finding:
 | Use Case #13 | Extension 2b: one driver cannot read another's statistics | `test_one_driver_cannot_read_another_drivers_statistics` |
 | Use Case #13 | Extension 2b: a customer cannot read driver statistics | `test_a_customer_cannot_read_driver_statistics` |
 | Use Case #13 | Extension 2c: an unknown driver username is not found | `test_an_unknown_username_is_not_found` |
+
+| Use Case #14 | Precondition: a customer saves budget and dietary preferences | `test_a_customer_can_save_a_budget_and_a_restriction` |
+| Use Case #14 | Extension 4a (exact match): a matching allergen hides the food | `test_an_exactly_worded_restriction_hides_the_food` |
+| Use Case #14 | Extension 4a (plural): "peanuts" does not match "peanut" | `test_a_plural_restriction_still_hides_the_food` |
+| Use Case #14 | Extension 4a (category): "nuts" does not match "tree nuts" | `test_a_broader_restriction_still_hides_the_food` |
+| Use Case #14 | Extension 3b: the premium tier hides food above $35 | `test_premium_customers_can_see_the_whole_menu` |
+| Use Case #14 | Extension 5a: the food API applies no preference filtering | `test_the_food_api_applies_no_preferences_of_its_own` |

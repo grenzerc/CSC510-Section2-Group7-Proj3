@@ -1,0 +1,122 @@
+Use Case #14 pytest run: Food Recommendation
+Started: Mon Aug 31 01:08:18 EDT 2026
+API_BASE_URL: http://localhost:8080
+
+============================= test session starts ==============================
+platform darwin -- Python 3.12.4, pytest-9.1.1, pluggy-1.6.0 -- /Users/neelan/git/csc510/CSC510-Section2-Group7-Proj3/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/neelan/git/csc510/CSC510-Section2-Group7-Proj3
+collecting ... collected 6 items
+
+proj1/tests/test_food_recommendation_pytest.py::test_a_customer_can_save_a_budget_and_a_restriction PASSED [ 16%]
+proj1/tests/test_food_recommendation_pytest.py::test_an_exactly_worded_restriction_hides_the_food PASSED [ 33%]
+proj1/tests/test_food_recommendation_pytest.py::test_a_plural_restriction_still_hides_the_food FAILED [ 50%]
+proj1/tests/test_food_recommendation_pytest.py::test_a_broader_restriction_still_hides_the_food FAILED [ 66%]
+proj1/tests/test_food_recommendation_pytest.py::test_premium_customers_can_see_the_whole_menu FAILED [ 83%]
+proj1/tests/test_food_recommendation_pytest.py::test_the_food_api_applies_no_preferences_of_its_own FAILED [100%]
+
+=================================== FAILURES ===================================
+________________ test_a_plural_restriction_still_hides_the_food ________________
+
+menu_item = <function menu_item.<locals>.add at 0x101fa2160>
+
+    def test_a_plural_restriction_still_hides_the_food(menu_item):
+        """This proves extension 4a, and it is the one that matters.
+    
+        Expected to fail. The filter compares allergen and restriction with ===,
+        so a customer who wrote "peanuts" is shown a dish whose allergen is
+        recorded as "peanut". The app tells them it is safe to eat.
+        """
+        food = menu_item(price=8, allergies=["peanut"])
+    
+>       assert preference_filter(food, "no-limit", "peanuts") is False, (
+            f"{food['foodName']} contains peanut but survived a 'peanuts' restriction"
+        )
+E       AssertionError: rec_food_ewrkkpndqrjq contains peanut but survived a 'peanuts' restriction
+E       assert True is False
+E        +  where True = preference_filter({'id': 59, 'foodName': 'rec_food_ewrkkpndqrjq', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['peanut']}, 'no-limit', 'peanuts')
+
+proj1/tests/test_food_recommendation_pytest.py:119: AssertionError
+_______________ test_a_broader_restriction_still_hides_the_food ________________
+
+menu_item = <function menu_item.<locals>.add at 0x101fa0720>
+
+    def test_a_broader_restriction_still_hides_the_food(menu_item):
+        """This proves extension 4a again with a category rather than a plural.
+    
+        Expected to fail. "nuts" does not equal "tree nuts".
+        """
+        food = menu_item(price=8, allergies=["tree nuts"])
+    
+>       assert preference_filter(food, "no-limit", "nuts") is False, (
+            f"{food['foodName']} contains tree nuts but survived a 'nuts' restriction"
+        )
+E       AssertionError: rec_food_ewrkkpndqrjr contains tree nuts but survived a 'nuts' restriction
+E       assert True is False
+E        +  where True = preference_filter({'id': 60, 'foodName': 'rec_food_ewrkkpndqrjr', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['tree nuts']}, 'no-limit', 'nuts')
+
+proj1/tests/test_food_recommendation_pytest.py:131: AssertionError
+________________ test_premium_customers_can_see_the_whole_menu _________________
+
+menu_item = <function menu_item.<locals>.add at 0x101fa05e0>
+
+    def test_premium_customers_can_see_the_whole_menu(menu_item):
+        """This proves extension 3b.
+    
+        Expected to fail. "premium" is capped at 35, so the customer who picked the
+        most permissive tier is the only one who cannot see a $40 dish.
+        """
+        expensive = menu_item(price=40)
+    
+>       assert preference_filter(expensive, "premium", "") is True, (
+            "the premium tier hid a dish it should have shown"
+        )
+E       AssertionError: the premium tier hid a dish it should have shown
+E       assert False is True
+E        +  where False = preference_filter({'id': 61, 'foodName': 'rec_food_ewrkkpndqrjs', 'amount': 5, 'price': 40, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, 'premium', '')
+
+proj1/tests/test_food_recommendation_pytest.py:144: AssertionError
+_____________ test_the_food_api_applies_no_preferences_of_its_own ______________
+
+menu_item = <function menu_item.<locals>.add at 0x101fd37e0>
+
+    def test_the_food_api_applies_no_preferences_of_its_own(menu_item):
+        """This proves extension 5a: filtering is presentation only.
+    
+        Expected to fail. The customer says they cannot eat peanuts, and
+        GET /api/foods hands back the peanut dish anyway, because no filtering
+        happens on the server at all.
+        """
+        food = menu_item(price=8, allergies=["peanut"])
+        _, customer = register_and_login("customer", "allergic")
+        set_preferences(customer, "budget", "peanut")
+    
+        status, menu = api_request("GET", "/api/foods", token=customer)
+        assert status == 200, menu
+    
+        returned = [item["foodName"] for item in menu]
+>       assert food["foodName"] not in returned, (
+            "the API returned a dish the customer is allergic to -- "
+            "any client that skips the browser filter shows it"
+        )
+E       AssertionError: the API returned a dish the customer is allergic to -- any client that skips the browser filter shows it
+E       assert 'rec_food_ewrkkpndqrjt' not in ['COFFEE', 'TEA', 'BAGEL', 'BANANA', 'APPLE', 'ORANGE JUICE', 'YOGURT', 'GRANOLA BAR', 'TURKEY SANDWICH', 'GARDEN SALAD', 'CAESAR SALAD', 'PASTA', 'PIZZA SLICE', 'BURRITO', 'VEGETABLE SOUP', 'CHICKEN NOODLE SOUP', 'SUSHI ROLL', 'CHICKEN WRAP', 'STEAK', 'SALMON', 'LOBSTER', 'SUSHI PLATTER', 'RIBEYE', 'VEGGIE BURGER', 'TOFU BOWL', 'QUINOA SALAD', 'HUMMUS WRAP', 'CHOCOLATE CAKE', 'ICE CREAM', 'COOKIES', 'FRUIT SALAD', 'rec_food_bgyhibrfkgq', 'driver_food_bgyhibrlcfa', 'test_food_bgyhibrlcfa', 'test_food_bgyhibrqude', 'rec_food_ewrkddcbcbzl', 'rec_food_ewrkddcbcbzm', 'rec_food_ewrkddcbcbzn', 'rec_food_ewrkddcbcbzo', 'rec_food_ewrkddcbcbzp', 'driver_food_ewrkddcwzaxe', 'test_food_ewrkddcwzaxf', 'test_food_ewrkddcwzaxh', 'test_food_ewrkddcwzaxi', 'rec_food_ewrkdfdxqezt', 'rec_food_ewrkdfdxqezu', 'rec_food_ewrkdfdxqezv', 'rec_food_ewrkdfdxqezw', 'rec_food_ewrkdfdxqezx', 'driver_food_ewrkdfetneuh', 'test_food_ewrkdfetneui', 'test_food_ewrkdffpkdru', 'test_food_ewrkdffpkdrv', 'driver_food_ewrkfymdvfvj', 'test_food_ewrkfymdvfvk', 'test_food_ewrkfymzsesw', 'test_food_ewrkfymzsesx', 'rec_food_ewrkkpndqrjp', 'rec_food_ewrkkpndqrjq', 'rec_food_ewrkkpndqrjr', 'rec_food_ewrkkpndqrjs', 'rec_food_ewrkkpndqrjt']
+
+proj1/tests/test_food_recommendation_pytest.py:164: AssertionError
+=========================== short test summary info ============================
+FAILED proj1/tests/test_food_recommendation_pytest.py::test_a_plural_restriction_still_hides_the_food - AssertionError: rec_food_ewrkkpndqrjq contains peanut but survived a 'peanuts' restriction
+assert True is False
+ +  where True = preference_filter({'id': 59, 'foodName': 'rec_food_ewrkkpndqrjq', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['peanut']}, 'no-limit', 'peanuts')
+FAILED proj1/tests/test_food_recommendation_pytest.py::test_a_broader_restriction_still_hides_the_food - AssertionError: rec_food_ewrkkpndqrjr contains tree nuts but survived a 'nuts' restriction
+assert True is False
+ +  where True = preference_filter({'id': 60, 'foodName': 'rec_food_ewrkkpndqrjr', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['tree nuts']}, 'no-limit', 'nuts')
+FAILED proj1/tests/test_food_recommendation_pytest.py::test_premium_customers_can_see_the_whole_menu - AssertionError: the premium tier hid a dish it should have shown
+assert False is True
+ +  where False = preference_filter({'id': 61, 'foodName': 'rec_food_ewrkkpndqrjs', 'amount': 5, 'price': 40, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, 'premium', '')
+FAILED proj1/tests/test_food_recommendation_pytest.py::test_the_food_api_applies_no_preferences_of_its_own - AssertionError: the API returned a dish the customer is allergic to -- any client that skips the browser filter shows it
+assert 'rec_food_ewrkkpndqrjt' not in ['COFFEE', 'TEA', 'BAGEL', 'BANANA', 'APPLE', 'ORANGE JUICE', 'YOGURT', 'GRANOLA BAR', 'TURKEY SANDWICH', 'GARDEN SALAD', 'CAESAR SALAD', 'PASTA', 'PIZZA SLICE', 'BURRITO', 'VEGETABLE SOUP', 'CHICKEN NOODLE SOUP', 'SUSHI ROLL', 'CHICKEN WRAP', 'STEAK', 'SALMON', 'LOBSTER', 'SUSHI PLATTER', 'RIBEYE', 'VEGGIE BURGER', 'TOFU BOWL', 'QUINOA SALAD', 'HUMMUS WRAP', 'CHOCOLATE CAKE', 'ICE CREAM', 'COOKIES', 'FRUIT SALAD', 'rec_food_bgyhibrfkgq', 'driver_food_bgyhibrlcfa', 'test_food_bgyhibrlcfa', 'test_food_bgyhibrqude', 'rec_food_ewrkddcbcbzl', 'rec_food_ewrkddcbcbzm', 'rec_food_ewrkddcbcbzn', 'rec_food_ewrkddcbcbzo', 'rec_food_ewrkddcbcbzp', 'driver_food_ewrkddcwzaxe', 'test_food_ewrkddcwzaxf', 'test_food_ewrkddcwzaxh', 'test_food_ewrkddcwzaxi', 'rec_food_ewrkdfdxqezt', 'rec_food_ewrkdfdxqezu', 'rec_food_ewrkdfdxqezv', 'rec_food_ewrkdfdxqezw', 'rec_food_ewrkdfdxqezx', 'driver_food_ewrkdfetneuh', 'test_food_ewrkdfetneui', 'test_food_ewrkdffpkdru', 'test_food_ewrkdffpkdrv', 'driver_food_ewrkfymdvfvj', 'test_food_ewrkfymdvfvk', 'test_food_ewrkfymzsesw', 'test_food_ewrkfymzsesx', 'rec_food_ewrkkpndqrjp', 'rec_food_ewrkkpndqrjq', 'rec_food_ewrkkpndqrjr', 'rec_food_ewrkkpndqrjs', 'rec_food_ewrkkpndqrjt']
+========================= 4 failed, 2 passed in 1.19s ==========================
+
+Finished: Mon Aug 31 01:08:20 EDT 2026
+Exit status: 1
+Output file: /Users/neelan/git/csc510/CSC510-Section2-Group7-Proj3/proj1/test-output/food-recommendation-pytest-20260831-010818.txt

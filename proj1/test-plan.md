@@ -163,3 +163,55 @@ Known Result:
 - Extension 2c fails: an unknown username returns 200 with an empty body
   instead of 404, so a caller cannot tell "no such driver" apart from
   "a real driver with nothing delivered yet."
+
+## Use Case #14: Food Recommendation
+
+Test file:
+- `proj1/tests/test_food_recommendation_pytest.py`
+
+Runner:
+- `proj1/tests/run_food_recommendation_pytest.sh`
+
+Output location:
+- `proj1/test-output/`
+
+Setup:
+1. Start the backend:
+   `cd food-seer-backend`
+   `mvn spring-boot:run`
+2. From the repository root, run:
+   `proj1/tests/run_food_recommendation_pytest.sh`
+
+Note on approach:
+- There is no recommendation endpoint. `Recommendations.js` pulls the full menu
+  from `GET /api/foods` and filters it client-side in
+  `filterFoodsByPreferences()`. `preference_filter()` in the test file is a
+  direct port of that function, wrong parts included, so these tests exercise
+  what the app actually does rather than what a recommendation feature should do.
+
+Test Cases:
+- Precondition check: a customer saves a budget tier and a dietary restriction.
+- Extension 4a (exact match): an allergen worded exactly like the restriction
+  hides the food.
+- Extension 4a (plural): a restriction of "peanuts" against an allergen of
+  "peanut".
+- Extension 4a (category): a restriction of "nuts" against an allergen of
+  "tree nuts".
+- Extension 3b: a customer on the "premium" tier views a $40 dish.
+- Extension 5a: a customer with a saved peanut restriction calls
+  `GET /api/foods` directly.
+
+Known Result:
+- Preferences save and read back correctly, and an exact-wording match does
+  hide the food -- the filter is not broken in every case, only most of them.
+- Extension 4a fails on both wording cases. The filter compares allergen and
+  restriction with `===` after lowercasing, so `"peanut"` does not match
+  `"peanuts"` and `"tree nuts"` does not match `"nuts"`. In both cases the
+  customer is shown a dish they explicitly said they cannot eat.
+- Extension 3b fails: the premium tier is capped at $35 rather than being
+  unbounded, so the customer on the most permissive tier is the only one who
+  cannot see a $40 item.
+- Extension 5a fails: `GET /api/foods` returns every food regardless of the
+  caller's saved preferences, including a dish the customer is allergic to.
+  Filtering is presentation-only in the React client; any other caller of the
+  API sees the unfiltered menu.
