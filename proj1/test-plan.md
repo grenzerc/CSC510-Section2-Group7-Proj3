@@ -256,10 +256,17 @@ Known Result:
   inconsistency rather than endorsing it -- DRIVER is absent from this
   endpoint's role list while present on the order endpoints, which reads as an
   oversight rather than a decision.
-- The main success scenario is UNVERIFIED. Ollama was not installed and running
-  on the test machine, so `test_the_assistant_answers_a_greeting` skipped. No
-  test in this suite demonstrates that the assistant ever produces a real
-  answer. This is a genuine gap in our coverage, not a passing result.
+- The main success scenario passes with Ollama running and `qwen2.5:1.5b`
+  pulled: the assistant returns a non-empty reply that does not begin with
+  "Error:".
+- Because the two interesting cases are mutually exclusive, this use case was
+  covered by two runs, and both output files are kept:
+    * `chat-assistant-pytest-20260831-142032.txt` -- Ollama stopped. The
+      greeting test skips; extension 4a runs and fails.
+    * `chat-assistant-pytest-20260831-144355.txt` -- Ollama running. The
+      greeting test passes; extension 4a skips.
+  Neither run alone covers the use case. Together they show the same endpoint
+  working and rotted.
 - Extension 4a fails, and this is the code-rot finding. With Ollama
   unreachable, the backend returned:
 
