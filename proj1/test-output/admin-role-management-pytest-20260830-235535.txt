@@ -1,0 +1,89 @@
+Use Case #11 pytest run: Administrative Role Management
+Started: Sun Aug 30 23:55:35 EDT 2026
+API_BASE_URL: http://localhost:8080
+
+============================= test session starts ==============================
+platform darwin -- Python 3.12.4, pytest-9.1.1, pluggy-1.6.0 -- /Users/neelan/git/csc510/CSC510-Section2-Group7-Proj3/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/neelan/git/csc510/CSC510-Section2-Group7-Proj3
+collecting ... collected 7 items
+
+proj1/tests/test_admin_role_management_pytest.py::test_admin_can_promote_a_customer_to_staff PASSED [ 14%]
+proj1/tests/test_admin_role_management_pytest.py::test_a_customer_cannot_list_every_user PASSED [ 28%]
+proj1/tests/test_admin_role_management_pytest.py::test_changing_the_role_of_a_user_that_does_not_exist_is_not_found PASSED [ 42%]
+proj1/tests/test_admin_role_management_pytest.py::test_rejects_a_role_that_is_not_a_real_role FAILED [ 57%]
+proj1/tests/test_admin_role_management_pytest.py::test_rejects_an_empty_role FAILED [ 71%]
+proj1/tests/test_admin_role_management_pytest.py::test_registering_with_an_unknown_role_is_rejected FAILED [ 85%]
+proj1/tests/test_admin_role_management_pytest.py::test_the_last_admin_cannot_be_demoted SKIPPEDs) [100%]
+
+=================================== FAILURES ===================================
+_________________ test_rejects_a_role_that_is_not_a_real_role __________________
+
+admin = 'eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc4ODE0ODUzNSwiZXhwIjoxNzg4NzUzMzM1fQ.bcwfmvsTbi3S6wAORcVeSMzrVbqnqI0OZk1qcOgtH8uD-hMfoiermJbtLqIBLU23'
+
+    def test_rejects_a_role_that_is_not_a_real_role(admin):
+        """This proves extension 5b: garbage roles should not be stored.
+    
+        Expected to fail today. UserServiceImpl.updateUserRole hands the string
+        straight to setRole() without checking it against either Roles class, so
+        the backend answers 200 and persists whatever it was given.
+        """
+        account, _ = register_and_login("customer", "wizard")
+        user_id = find_user_id(admin, account["username"])
+    
+        status, body = api_request(
+            "PUT", f"/api/users/{user_id}/role", {"role": "ROLE_WIZARD"}, token=admin
+        )
+    
+>       assert status == 400, f"backend accepted an invented role: {status} {body}"
+E       AssertionError: backend accepted an invented role: 200 {'id': 55, 'username': 'wizard_ewrkfegyksha', 'email': 'wizard_ewrkfegyksha@example.com', 'role': 'ROLE_WIZARD', 'costPreference': None, 'dietaryRestrictions': None}
+E       assert 200 == 400
+
+proj1/tests/test_admin_role_management_pytest.py:73: AssertionError
+__________________________ test_rejects_an_empty_role __________________________
+
+admin = 'eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc4ODE0ODUzNSwiZXhwIjoxNzg4NzUzMzM1fQ.bcwfmvsTbi3S6wAORcVeSMzrVbqnqI0OZk1qcOgtH8uD-hMfoiermJbtLqIBLU23'
+
+    def test_rejects_an_empty_role(admin):
+        """This proves extension 5b for the empty string, which leaves an account able
+        to log in but authorized for nothing."""
+        account, _ = register_and_login("customer", "blank_role")
+        user_id = find_user_id(admin, account["username"])
+    
+        status, body = api_request(
+            "PUT", f"/api/users/{user_id}/role", {"role": ""}, token=admin
+        )
+    
+>       assert status == 400, f"backend accepted an empty role: {status} {body}"
+E       AssertionError: backend accepted an empty role: 200 {'id': 56, 'username': 'blank_role_ewrkfegykshb', 'email': 'blank_role_ewrkfegykshb@example.com', 'role': '', 'costPreference': None, 'dietaryRestrictions': None}
+E       assert 200 == 400
+
+proj1/tests/test_admin_role_management_pytest.py:86: AssertionError
+______________ test_registering_with_an_unknown_role_is_rejected _______________
+
+    def test_registering_with_an_unknown_role_is_rejected():
+        """This proves extension 4a from the other direction.
+    
+        setCorrectRoles() returns "" for anything that is not driver/customer/staff,
+        so registering as "admin" quietly creates an account with no role at all.
+        """
+        account = new_account("admin", "fake_admin")
+        status, body = api_request("POST", "/auth/register", account)
+    
+>       assert status == 400, f"registration accepted an unknown role: {status} {body}"
+E       AssertionError: registration accepted an unknown role: 200 {'message': 'Registered'}
+E       assert 200 == 400
+
+proj1/tests/test_admin_role_management_pytest.py:98: AssertionError
+=========================== short test summary info ============================
+FAILED proj1/tests/test_admin_role_management_pytest.py::test_rejects_a_role_that_is_not_a_real_role - AssertionError: backend accepted an invented role: 200 {'id': 55, 'username': 'wizard_ewrkfegyksha', 'email': 'wizard_ewrkfegyksha@example.com', 'role': 'ROLE_WIZARD', 'costPreference': None, 'dietaryRestrictions': None}
+assert 200 == 400
+FAILED proj1/tests/test_admin_role_management_pytest.py::test_rejects_an_empty_role - AssertionError: backend accepted an empty role: 200 {'id': 56, 'username': 'blank_role_ewrkfegykshb', 'email': 'blank_role_ewrkfegykshb@example.com', 'role': '', 'costPreference': None, 'dietaryRestrictions': None}
+assert 200 == 400
+FAILED proj1/tests/test_admin_role_management_pytest.py::test_registering_with_an_unknown_role_is_rejected - AssertionError: registration accepted an unknown role: 200 {'message': 'Registered'}
+assert 200 == 400
+==================== 3 failed, 3 passed, 1 skipped in 1.33s ====================
+
+Finished: Sun Aug 30 23:55:36 EDT 2026
+Exit status: 1
+Output file: /Users/neelan/git/csc510/CSC510-Section2-Group7-Proj3/proj1/test-output/admin-role-management-pytest-20260830-235535.txt
