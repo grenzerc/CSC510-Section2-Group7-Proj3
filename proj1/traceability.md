@@ -25,3 +25,9 @@ Current finding:
 | Use Case #12 | Extension 4b: a customer cannot delete a menu item | `test_a_customer_cannot_delete_a_menu_item` |
 | Use Case #12 | Extension 4c: a negative price is rejected | `test_rejects_a_negative_price` |
 | Use Case #12 | Extension 4e: a duplicate food name is rejected | `test_rejects_a_duplicate_food_name` |
+
+| Use Case #13 | Main success scenario: a driver reads their own statistics | `test_a_driver_can_read_their_own_statistics` |
+| Use Case #13 | Extension 2a: statistics require a login | `test_driver_statistics_require_a_login` |
+| Use Case #13 | Extension 2b: one driver cannot read another's statistics | `test_one_driver_cannot_read_another_drivers_statistics` |
+| Use Case #13 | Extension 2b: a customer cannot read driver statistics | `test_a_customer_cannot_read_driver_statistics` |
+| Use Case #13 | Extension 2c: an unknown driver username is not found | `test_an_unknown_username_is_not_found` |

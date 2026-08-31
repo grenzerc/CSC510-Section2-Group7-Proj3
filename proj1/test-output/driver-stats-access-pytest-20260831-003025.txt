@@ -1,0 +1,97 @@
+Use Case #13 pytest run: Driver Delivery Statistics
+Started: Mon Aug 31 00:30:25 EDT 2026
+API_BASE_URL: http://localhost:8080
+
+============================= test session starts ==============================
+platform darwin -- Python 3.12.4, pytest-9.1.1, pluggy-1.6.0 -- /Users/neelan/git/csc510/CSC510-Section2-Group7-Proj3/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/neelan/git/csc510/CSC510-Section2-Group7-Proj3
+collecting ... collected 5 items
+
+proj1/tests/test_driver_stats_access_pytest.py::test_a_driver_can_read_their_own_statistics PASSED [ 20%]
+proj1/tests/test_driver_stats_access_pytest.py::test_driver_statistics_require_a_login FAILED [ 40%]
+proj1/tests/test_driver_stats_access_pytest.py::test_one_driver_cannot_read_another_drivers_statistics FAILED [ 60%]
+proj1/tests/test_driver_stats_access_pytest.py::test_a_customer_cannot_read_driver_statistics FAILED [ 80%]
+proj1/tests/test_driver_stats_access_pytest.py::test_an_unknown_username_is_not_found FAILED [100%]
+
+=================================== FAILURES ===================================
+____________________ test_driver_statistics_require_a_login ____________________
+
+    def test_driver_statistics_require_a_login():
+        """This proves extension 2a: earnings are not public.
+    
+        Expected to fail today. SpringSecurityConfig calls permitAll() on every GET
+        under /api/driverStats, and DriverStatsController has no @PreAuthorize --
+        the annotation is imported in that file and never used. No token needed.
+        """
+        driver, _ = register_and_login("driver", "public_stats")
+    
+        status, body = api_request("GET", stats_path(driver["username"]))
+    
+>       assert status == 401, f"driver statistics were served with no credentials: {status} {body}"
+E       AssertionError: driver statistics were served with no credentials: 200 {'username': 'public_stats_ewrkhtyavrhd', 'totalDeliveries': 0, 'totalEarning': 0.0, 'averageRating': 0.0, 'activeOrders': 0}
+E       assert 200 == 401
+
+proj1/tests/test_driver_stats_access_pytest.py:46: AssertionError
+____________ test_one_driver_cannot_read_another_drivers_statistics ____________
+
+    def test_one_driver_cannot_read_another_drivers_statistics():
+        """This proves extension 2b.
+    
+        Expected to fail today. The endpoint reads the username straight off the
+        query string and never compares it to whoever is holding the token.
+        """
+        victim, _ = register_and_login("driver", "victim")
+        _, snooper = register_and_login("driver", "snooper")
+    
+        status, body = api_request("GET", stats_path(victim["username"]), token=snooper)
+    
+>       assert status == 403, f"one driver read another's earnings: {status} {body}"
+E       AssertionError: one driver read another's earnings: 200 {'username': 'victim_ewrkhtyavrhe', 'totalDeliveries': 0, 'totalEarning': 0.0, 'averageRating': 0.0, 'activeOrders': 0}
+E       assert 200 == 403
+
+proj1/tests/test_driver_stats_access_pytest.py:60: AssertionError
+________________ test_a_customer_cannot_read_driver_statistics _________________
+
+    def test_a_customer_cannot_read_driver_statistics():
+        """This proves extension 2b for a non-driver account."""
+        driver, _ = register_and_login("driver", "watched")
+        _, customer = register_and_login("customer", "watcher")
+    
+        status, body = api_request("GET", stats_path(driver["username"]), token=customer)
+    
+>       assert status == 403, f"a customer read driver earnings: {status} {body}"
+E       AssertionError: a customer read driver earnings: 200 {'username': 'watched_ewrkhtyavrhg', 'totalDeliveries': 0, 'totalEarning': 0.0, 'averageRating': 0.0, 'activeOrders': 0}
+E       assert 200 == 403
+
+proj1/tests/test_driver_stats_access_pytest.py:70: AssertionError
+____________________ test_an_unknown_username_is_not_found _____________________
+
+    def test_an_unknown_username_is_not_found():
+        """This proves extension 2c.
+    
+        Expected to fail today. The controller returns 200 with whatever the
+        service produced, so a caller cannot tell "no such driver" apart from
+        "a driver who has not delivered anything yet".
+        """
+        status, body = api_request("GET", stats_path("nobody_by_this_name"))
+    
+>       assert status == 404, f"expected 404 for an unknown driver, got {status} {body}"
+E       AssertionError: expected 404 for an unknown driver, got 200 {}
+E       assert 200 == 404
+
+proj1/tests/test_driver_stats_access_pytest.py:82: AssertionError
+=========================== short test summary info ============================
+FAILED proj1/tests/test_driver_stats_access_pytest.py::test_driver_statistics_require_a_login - AssertionError: driver statistics were served with no credentials: 200 {'username': 'public_stats_ewrkhtyavrhd', 'totalDeliveries': 0, 'totalEarning': 0.0, 'averageRating': 0.0, 'activeOrders': 0}
+assert 200 == 401
+FAILED proj1/tests/test_driver_stats_access_pytest.py::test_one_driver_cannot_read_another_drivers_statistics - AssertionError: one driver read another's earnings: 200 {'username': 'victim_ewrkhtyavrhe', 'totalDeliveries': 0, 'totalEarning': 0.0, 'averageRating': 0.0, 'activeOrders': 0}
+assert 200 == 403
+FAILED proj1/tests/test_driver_stats_access_pytest.py::test_a_customer_cannot_read_driver_statistics - AssertionError: a customer read driver earnings: 200 {'username': 'watched_ewrkhtyavrhg', 'totalDeliveries': 0, 'totalEarning': 0.0, 'averageRating': 0.0, 'activeOrders': 0}
+assert 200 == 403
+FAILED proj1/tests/test_driver_stats_access_pytest.py::test_an_unknown_username_is_not_found - AssertionError: expected 404 for an unknown driver, got 200 {}
+assert 200 == 404
+========================= 4 failed, 1 passed in 1.09s ==========================
+
+Finished: Mon Aug 31 00:30:26 EDT 2026
+Exit status: 1
+Output file: /Users/neelan/git/csc510/CSC510-Section2-Group7-Proj3/proj1/test-output/driver-stats-access-pytest-20260831-003025.txt

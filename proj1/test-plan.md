@@ -120,3 +120,46 @@ Known Result:
   is returned to the client as an unhandled HTTP 500. This is an information
   disclosure on top of the missing authorization check -- any caller who
   triggers it, admin included, would see internal SQL and schema details.
+
+## Use Case #13: Driver Delivery Statistics
+
+Test file:
+- `proj1/tests/test_driver_stats_access_pytest.py`
+
+Runner:
+- `proj1/tests/run_driver_stats_access_pytest.sh`
+
+Output location:
+- `proj1/test-output/`
+
+Setup:
+1. Start the backend:
+   `cd food-seer-backend`
+   `mvn spring-boot:run`
+2. From the repository root, run:
+   `proj1/tests/run_driver_stats_access_pytest.sh`
+
+Test Cases:
+- Main success scenario: a driver reads their own statistics.
+- Extension 2a: statistics are requested with no login at all.
+- Extension 2b: one driver requests another driver's statistics.
+- Extension 2b (non-driver case): a customer requests a driver's statistics.
+- Extension 2c: an unknown username is requested.
+
+Known Result:
+- The main path passes: a driver reads their own zeroed-out statistics right
+  after registration.
+- Every other case fails, and all for the same root cause.
+  `SpringSecurityConfig` calls `permitAll()` on every `GET` under
+  `/api/driverStats/**`, and `DriverStatsController` has no `@PreAuthorize` at
+  all -- the annotation is imported in that file and never applied. The
+  endpoint also never compares the `username` query parameter against the
+  authenticated caller.
+- Extension 2a fails: statistics are served with zero credentials (200,
+  not 401).
+- Extension 2b fails both ways: a second driver reads the first driver's
+  earnings (200, not 403), and a customer account reads a driver's earnings
+  the same way (200, not 403).
+- Extension 2c fails: an unknown username returns 200 with an empty body
+  instead of 404, so a caller cannot tell "no such driver" apart from
+  "a real driver with nothing delivered yet."
