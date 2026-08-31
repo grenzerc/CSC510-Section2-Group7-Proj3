@@ -55,10 +55,10 @@ Part: Duplicate account prevention
 Name: User is prevented from making a new account with the same email as existing account
 Primary actor: User
 Stakeholders & interests: 
-  1. new users: need appropriate feedback when registration fails
-  2. Existing users: need protection from others using their email for another account
-  3. Admin: needs errors to be handled appropriate instead of causing crashes
-  4. Business: needs user accounts to be unique
+  new users: need appropriate feedback when registration fails
+  Existing users: need protection from others using their email for another account
+  Admin: needs errors to be handled appropriate instead of causing crashes
+  Business: needs user accounts to be unique
 Preconditions: 
   1. Frontend and Backend are running correctly
   2. An account already exists with the email the user is trying to register a new account with
@@ -90,15 +90,50 @@ Postconditions:
   3. Frontend provides error message informing user that registration failed due to duplicate email
 
 ## Use Case #3
-Part:
-Name:
-Primary actor:
+Part: Registration Error Handling
+Name: User receives a specific error message on frontend based on how account registration fails
+Primary actor: User
 Stakeholders & interests:
+    New users: Need information on why their registration attempt failed
+    Existing users: need to be protected from duplicate accounts using their identity
+    Business: Wants new users to be able to complete registration by knowing why attempts failed. 
+    Admin: Needs registration problems to be handled appropriately and in an informative way for users
 Preconditions:
-Trigger:
-Main success scenario
+    1. Frontend and backend are working correctly
+    2. User is on the registration page
+    3. User not logged in
+    4. Validation rules exist on backend for username, password, password confirmation, email, and role
+Trigger: User submits registration form with data field entries that are incorrect, causing registration to fail
+Main success scenario:
+        1. User accesses the user registration page
+        2. User enters registration information
+        3. User submits registration form
+        4. Backend rejects registration for a specific reason
+        5. Backend sends error response to frontend
+        6. Frontend displays a specific, clear error message explaining why specifically registration failed
+        7. User remains on registration form and can correct the form and submit again
 Extensions:
+        2a. User enters a username that is already taken
+            Frontend displays an error message telling the user that the username is already taken
+        2b. User enters an email that is already being used by another account
+            Frontend displays an error message telling the user that the email is already tied to another account
+        2c. User enters email in an invalid format
+            Frontend displays an error message telling the user that the email must be formatted in a certain way
+        2d. User enters password in an invalid format
+            Frontend displays an error message telling user that passwords must be formatted in a certain way
+        2e. User enters a password and password confirmation that do not match
+            Frontend displays an error message telling user that password and password confirmation must be the same
+        2f. User does not enter a role
+            Frontend displays an error message telling user that a role must be selected
+        4a. Backend returns an unexpected server error
+            Frontend displays a registration error message
+        5a. Backend returns generic error message
+            Frontend displays a generic error message        
 Postconditions:
+    1. Invalid registration is not completed
+    2. No invalid user account is created
+    3. User sees error message specific to the cause of failure
+    4. User remains on the registration form and is able to edit it and submit again
 
 ## Use Case #4
 Part:
