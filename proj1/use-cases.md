@@ -103,13 +103,13 @@ Main Success Scenario:
 6. System confirms the deletion and refreshes the user list.
 Extensions:
 - 2a. Admin attempts to delete their own account.
-  The Delete button is disabled for the admin's own row, and a direct click attempt shows a warning message — but this is enforced only on the frontend. Bypassing the UI allows an admin to delete their own account, since the backend has no self-delete check at all.
+  The Delete button is disabled for the admin's own row, and a direct click attempt shows a warning message ,but this is enforced only on the frontend. Bypassing the UI allows an admin to delete their own account, since the backend has no self-delete check at all.
 - 2b. Target user does not exist.
   System reports success anyway, without indicating whether a user was actually found or deleted.
 - 5a. The deleted user has placed orders.
   All of that user's orders are permanently deleted along with the account, with no warning shown to the admin beforehand and no soft-delete or archive.
 - 5b. The deleted user was a driver.
-  Their driver statistics record (total deliveries, earnings, rating history) is never touched — it's left in the database, now orphaned and tied to a username with no account.
+  Their driver statistics record (total deliveries, earnings, rating history) is never touched ,it's left in the database, now orphaned and tied to a username with no account.
 - 5c. The deleted user is the last remaining admin.
   
 Postconditions:
@@ -138,10 +138,10 @@ Main Success Scenario:
 6. System confirms the addition and the food list refreshes.
 Extensions:
 - 2a. A logged-in account that is not Admin or Staff submits a request to this same action directly, bypassing the interface.
-  The system has no check on who is allowed to perform this action — the request succeeds exactly as if it came from an admin. Only the interface itself hides this feature from non-admin/staff accounts; nothing prevents the underlying action itself.
+  The system has no check on who is allowed to perform this action ,the request succeeds exactly as if it came from an admin. Only the interface itself hides this feature from non-admin/staff accounts; nothing prevents the underlying action itself.
 - 3a. The submitted name already matches an existing food item.
   System rejects the submission as a duplicate.
-- 3b. The submitted fields are invalid — missing name, a negative amount or price, or a blank allergies entry.
+- 3b. The submitted fields are invalid ,missing name, a negative amount or price, or a blank allergies entry.
   System rejects the submission.
 
 Postconditions:
@@ -170,7 +170,7 @@ Main Success Scenario:
 6. System confirms the removal and the food list refreshes.
 Extensions:
 - 1a. A logged-in account that is not Admin or Staff submits a request to this same action directly, bypassing the interface.
-  The system has no check on who is allowed to perform this action — the request succeeds exactly as if it came from an admin. Only the interface itself hides this feature from non-admin/staff accounts.
+  The system has no check on who is allowed to perform this action ,the request succeeds exactly as if it came from an admin. Only the interface itself hides this feature from non-admin/staff accounts.
 - 1b. The specified food item does not exist.
   System rejects the request, naming the missing item.
 - 4a. The item appears in at least one unfulfilled order.
@@ -206,19 +206,19 @@ Main Success Scenario:
 6. Dashboard reloads to reflect the updated order.
 Extensions:
 - 2a. Order ID does not exist.
-  System detects that the order doesn't exist, but still reports success with an empty result instead of a clear "not found" response — the failure is swallowed rather than surfaced to the caller.
+  System detects that the order doesn't exist, but still reports success with an empty result instead of a clear "not found" response ,the failure is swallowed rather than surfaced to the caller.
 - 2b. Order is already assigned to another driver, or already "Picked Up".
-  No check exists — any driver can "pick up" any order regardless of its current state, silently reassigning it.
+  No check exists , any driver can "pick up" any order regardless of its current state, silently reassigning it.
 - 5a. "Delivered" is submitted by a driver who is NOT the order's assigned driver.
-  System does not reject or flag this — it silently leaves the order unfulfilled with no message returned, even though the order's status was already overwritten to "Delivered" regardless.
+  System does not reject or flag this , it silently leaves the order unfulfilled with no message returned, even though the order's status was already overwritten to "Delivered" regardless.
 - 5b. Order's driver is still unassigned when "Delivered" arrives (e.g. sent without a prior "Picked Up").
   The request crashes with an unhandled error before the update is saved.
 - 5c. The status value is missing.
   The request crashes with an unhandled error before the update is saved.
 - 5d. The status value is an unrecognized string (e.g. "Bananas").
-  No validation against an allowed set of values — it's accepted and persisted as-is, then silently falls into the unfulfilled branch.
+  No validation against an allowed set of values , it's accepted and persisted as-is, then silently falls into the unfulfilled branch.
 - 5e. An already-delivered order receives a second "Delivered" call.
-  No guard against reprocessing a completed order — the driver's earnings and total delivery count are both increased again, as if a second, separate delivery had occurred.
+  No guard against reprocessing a completed order , the driver's earnings and total delivery count are both increased again, as if a second, separate delivery had occurred.
 - 5f. A stale "Pick Up" click lands on an order that has already been delivered (e.g. the driver's dashboard hadn't refreshed).
   The system reverts the order's fulfilled status back to unfulfilled, even though the driver was already paid for delivering it ,leaving the platform's fulfilled-order count and the driver's credited earnings permanently out of agreement, with no way to reconcile them through the app.
 Postconditions:
