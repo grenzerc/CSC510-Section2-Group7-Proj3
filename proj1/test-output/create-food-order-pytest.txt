@@ -1,0 +1,70 @@
+============================= test session starts =============================
+platform win32 -- Python 3.10.11, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\tierr\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\python.exe
+rootdir: C:\Users\tierr\Documents\CSC510-Section2-Group7-Proj3
+collecting ... collected 4 items
+
+proj1/tests/test_create_food_order_pytest.py::test_authenticated_customer_can_create_food_order PASSED [ 25%]
+proj1/tests/test_create_food_order_pytest.py::test_created_order_appears_in_customer_orders PASSED [ 50%]
+proj1/tests/test_create_food_order_pytest.py::test_rejects_order_without_food FAILED [ 75%]
+proj1/tests/test_create_food_order_pytest.py::test_rejects_order_quantity_above_available_stock FAILED [100%]
+
+================================== FAILURES ===================================
+_______________________ test_rejects_order_without_food _______________________
+
+    def test_rejects_order_without_food():
+        """This checks whether the backend rejects an order containing no food."""
+        customer, token = create_and_login_customer("empty_order_customer")
+
+        empty_order = {
+            "name": "Empty Food Order",
+            "foods": [],
+            "isFulfilled": False,
+            "cost": 0,
+            "status": "Placed",
+            "deliveryCost": 0,
+        }
+
+        order_status, order_body = api_request(
+            "POST",
+            "/api/orders",
+            empty_order,
+            token=token,
+        )
+
+>       assert order_status == 400, order_body
+E       AssertionError: {'id': 10, 'name': 'Empty Food Order', 'foods': [], 'isFulfilled': False, ...}
+E       assert 200 == 400
+
+proj1\tests\test_create_food_order_pytest.py:226: AssertionError
+______________ test_rejects_order_quantity_above_available_stock ______________
+
+    def test_rejects_order_quantity_above_available_stock():
+        """This checks whether the backend rejects a quantity greater than current stock."""
+        customer, token = create_and_login_customer("overstock_order_customer")
+        food = get_in_stock_food(token)
+        unavailable_quantity = food["amount"] + 1
+
+        order_payload = build_order_payload(
+            food,
+            quantity=unavailable_quantity,
+            name="Excess Stock Order",
+        )
+
+        order_status, order_body = api_request(
+            "POST",
+            "/api/orders",
+            order_payload,
+            token=token,
+        )
+
+>       assert order_status == 400, order_body
+E       AssertionError: {'id': 11, 'name': 'Excess Stock Order', 'foods': [{'id': 1, 'foodName': 'COFFEE', 'amount': 50, 'price': 3, ...}, {'id': 1, 'foodName': 'COFFEE', 'amount': 50, 'price': 3, ...}, {'id': 1, 'foodName': 'COFFEE', 'amount': 50, 'price': 3, ...}, {'id': 1, 'foodName': 'COFFEE', 'amount': 50, 'price': 3, ...}, {'id': 1, 'foodName': 'COFFEE', 'amount': 50, 'price': 3, ...}, {'id': 1, 'foodName': 'COFFEE', 'amount': 50, 'price': 3, ...}, ...], 'isFulfilled': False, ...}
+E       assert 200 == 400
+
+proj1\tests\test_create_food_order_pytest.py:248: AssertionError
+=========================== short test summary info ===========================
+FAILED proj1/tests/test_create_food_order_pytest.py::test_rejects_order_without_food - AssertionError: {'id': 10, 'name': 'Empty Food Order', 'foods': [], 'isFulfilled': False, ...}
+assert 200 == 400
+FAILED proj1/tests/test_create_food_order_pytest.py::test_rejects_order_quantity_above_available_stock - AssertionError: {'id': 11, 'name': 'Excess Stock Order', 'foods': [{'id': 1, 'foodName': 'COFFEE', 'amount': 50, 'price': 3, ...}, {'id': 1, 'foodName': 'COFFEE', 'amount': 50, 'price': 3, ...}, {'id': 1, 'foodName': 'COFFEE', 'amount': 50, 'price': 3, ...}, {'id': 1, 'foodName': 'COFFEE', 'amount': 50, 'price': 3, ...}, {'id': 1, 'foodName': 'COFFEE', 'amount': 50, 'price': 3, ...}, {'id': 1, 'foodName': 'COFFEE', 'amount': 50, 'price': 3, ...}, ...], 'isFulfilled': False, ...}
+assert 200 == 400
+========================= 2 failed, 2 passed in 1.87s =========================
