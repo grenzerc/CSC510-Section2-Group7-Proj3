@@ -17,3 +17,11 @@ Current finding:
 | Use Case #11 | Extension 5b: an empty role is rejected | `test_rejects_an_empty_role` |
 | Use Case #11 | Extension 4a: registering with an unrecognized role is rejected | `test_registering_with_an_unknown_role_is_rejected` |
 | Use Case #11 | Extension 5c: the last admin cannot be demoted (written, not run) | `test_the_last_admin_cannot_be_demoted` |
+
+| Use Case #12 | Main success scenario: staff reads the inventory | `test_staff_can_read_the_inventory` |
+| Use Case #12 | Extension 2a: the inventory requires a login | `test_the_inventory_cannot_be_read_without_logging_in` |
+| Use Case #12 | Extension 4a: a customer cannot rewrite the inventory | `test_a_customer_cannot_rewrite_the_inventory` |
+| Use Case #12 | Extension 4b: a driver cannot add a menu item | `test_a_driver_cannot_add_a_menu_item` |
+| Use Case #12 | Extension 4b: a customer cannot delete a menu item | `test_a_customer_cannot_delete_a_menu_item` |
+| Use Case #12 | Extension 4c: a negative price is rejected | `test_rejects_a_negative_price` |
+| Use Case #12 | Extension 4e: a duplicate food name is rejected | `test_rejects_a_duplicate_food_name` |

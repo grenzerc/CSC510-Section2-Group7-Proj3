@@ -72,3 +72,51 @@ Known Result:
   `AuthController.register` stores the account anyway with HTTP 200 and the
   message "Registered". The account exists, can log in, and is authorized for
   nothing.
+
+## Use Case #12: Inventory and Menu Management
+
+Test file:
+- `proj1/tests/test_inventory_menu_authorization_pytest.py`
+
+Runner:
+- `proj1/tests/run_inventory_menu_authorization_pytest.sh`
+
+Output location:
+- `proj1/test-output/`
+
+Setup:
+1. Start the backend:
+   `cd food-seer-backend`
+   `mvn spring-boot:run`
+2. From the repository root, run:
+   `proj1/tests/run_inventory_menu_authorization_pytest.sh`
+3. Requires the seeded `admin` / `admin123` account.
+
+Test Cases:
+- Main success scenario: a staff account reads the inventory.
+- Extension 2a: the inventory cannot be read without logging in.
+- Extension 4a: a customer attempts to overwrite the inventory.
+- Extension 4b: a driver attempts to add a menu item; a customer attempts to
+  delete one.
+- Extension 4c: a negative price is rejected.
+- Extension 4e: a duplicate food name is rejected.
+
+Known Result:
+- The read path and its 401-when-unauthenticated case both pass.
+- Price and duplicate-name validation on writes both pass.
+- Extension 4a fails: `InventoryController` guards both `GET` and `POST` with
+  `hasAnyRole('ADMIN', 'STAFF', 'CUSTOMER')`, so a customer's POST to
+  `/api/inventory` returns 200 and is accepted as a valid write.
+- Extension 4b fails for creation the way expected: `FoodController` has no
+  `@PreAuthorize` on `POST /api/foods` at all, so a driver account creates a
+  menu item and gets back 200.
+- Extension 4b fails for deletion worse than expected. There is no
+  authorization check here either, but the request does not even reach a clean
+  403 -- it reaches the database, where the food is still referenced by the
+  singleton Inventory's food list and trips a MySQL foreign key constraint.
+  `FoodController.deleteFood()` only catches `IllegalStateException` (for foods
+  in unfulfilled orders); it does not catch this, so the raw constraint message
+  ("Cannot delete or update a parent row: a foreign key constraint fails...")
+  is returned to the client as an unhandled HTTP 500. This is an information
+  disclosure on top of the missing authorization check -- any caller who
+  triggers it, admin included, would see internal SQL and schema details.

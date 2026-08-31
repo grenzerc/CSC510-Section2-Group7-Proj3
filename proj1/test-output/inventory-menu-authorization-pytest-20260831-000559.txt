@@ -1,0 +1,97 @@
+Use Case #12 pytest run: Inventory and Menu Management
+Started: Mon Aug 31 00:05:59 EDT 2026
+API_BASE_URL: http://localhost:8080
+
+============================= test session starts ==============================
+platform darwin -- Python 3.12.4, pytest-9.1.1, pluggy-1.6.0 -- /Users/neelan/git/csc510/CSC510-Section2-Group7-Proj3/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/neelan/git/csc510/CSC510-Section2-Group7-Proj3
+collecting ... collected 7 items
+
+proj1/tests/test_inventory_menu_authorization_pytest.py::test_staff_can_read_the_inventory PASSED [ 14%]
+proj1/tests/test_inventory_menu_authorization_pytest.py::test_the_inventory_cannot_be_read_without_logging_in PASSED [ 28%]
+proj1/tests/test_inventory_menu_authorization_pytest.py::test_a_customer_cannot_rewrite_the_inventory FAILED [ 42%]
+proj1/tests/test_inventory_menu_authorization_pytest.py::test_a_driver_cannot_add_a_menu_item FAILED [ 57%]
+proj1/tests/test_inventory_menu_authorization_pytest.py::test_a_customer_cannot_delete_a_menu_item FAILED [ 71%]
+proj1/tests/test_inventory_menu_authorization_pytest.py::test_rejects_a_negative_price PASSED [ 85%]
+proj1/tests/test_inventory_menu_authorization_pytest.py::test_rejects_a_duplicate_food_name PASSED [100%]
+
+=================================== FAILURES ===================================
+_________________ test_a_customer_cannot_rewrite_the_inventory _________________
+
+admin = 'eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTc4ODE0OTE2MCwiZXhwIjoxNzg4NzUzOTYwfQ.n_4jdBYQtLr7R2oR3a77YTXdvesA1WdW7RK2m-jc4RIhC0TusMzC-0et-dX-Nu6A'
+
+    def test_a_customer_cannot_rewrite_the_inventory(admin):
+        """This proves extension 4a: stock levels are not a customer's to set.
+    
+        Expected to fail today. InventoryController guards both endpoints with
+        hasAnyRole('ADMIN', 'STAFF', 'CUSTOMER'), so a customer is allowed to POST.
+        We read the current inventory as admin and post it back unchanged, so a
+        pass or a fail leaves the data alone either way.
+        """
+        read_status, inventory = api_request("GET", "/api/inventory", token=admin)
+        assert read_status == 200, inventory
+    
+        _, customer = register_and_login("customer", "stock_meddler")
+        status, body = api_request("POST", "/api/inventory", inventory, token=customer)
+    
+>       assert status == 403, f"a customer was allowed to write the inventory: {status} {body}"
+E       AssertionError: a customer was allowed to write the inventory: 200 {'id': 1, 'foods': [{'id': 53, 'foodName': 'test_food_ewrkdffpkdrv', 'amount': 5, 'price': 12, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 52, 'foodName': 'test_food_ewrkdffpkdru', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 51, 'foodName': 'test_food_ewrkdfetneui', 'amount': 5, 'price': 12, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 50, 'foodName': 'driver_food_ewrkdfetneuh', 'amount': 1, 'price': 5, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 49, 'foodName': 'rec_food_ewrkdfdxqezx', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['peanut']}, {'id': 48, 'foodName': 'rec_food_ewrkdfdxqezw', 'amount': 5, 'price': 40, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 47, 'foodName': 'rec_food_ewrkdfdxqezv', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['tree nuts']}, {'id': 46, 'foodName': 'rec_food_ewrkdfdxqezu', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['peanut']}, {'id': 45, 'foodName': 'rec_food_ewrkdfdxqezt', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['peanut']}, {'id': 44, 'foodName': 'test_food_ewrkddcwzaxi', 'amount': 5, 'price': 12, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 43, 'foodName': 'test_food_ewrkddcwzaxh', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 42, 'foodName': 'test_food_ewrkddcwzaxf', 'amount': 5, 'price': 12, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 41, 'foodName': 'driver_food_ewrkddcwzaxe', 'amount': 1, 'price': 5, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 40, 'foodName': 'rec_food_ewrkddcbcbzp', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['peanut']}, {'id': 39, 'foodName': 'rec_food_ewrkddcbcbzo', 'amount': 5, 'price': 40, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 38, 'foodName': 'rec_food_ewrkddcbcbzn', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['tree nuts']}, {'id': 37, 'foodName': 'rec_food_ewrkddcbcbzm', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['peanut']}, {'id': 36, 'foodName': 'rec_food_ewrkddcbcbzl', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['peanut']}, {'id': 35, 'foodName': 'test_food_bgyhibrqude', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 34, 'foodName': 'test_food_bgyhibrlcfa', 'amount': 5, 'price': 12, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 33, 'foodName': 'driver_food_bgyhibrlcfa', 'amount': 1, 'price': 5, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 32, 'foodName': 'rec_food_bgyhibrfkgq', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['peanut']}]}
+E       assert 200 == 403
+
+proj1/tests/test_inventory_menu_authorization_pytest.py:87: AssertionError
+_____________________ test_a_driver_cannot_add_a_menu_item _____________________
+
+    def test_a_driver_cannot_add_a_menu_item():
+        """This proves extension 4b: menu changes belong to staff.
+    
+        Expected to fail today. FoodController carries no @PreAuthorize at all, so
+        every authenticated account can create food.
+        """
+        _, driver = register_and_login("driver", "menu_meddler")
+        food = {
+            "foodName": unique_name("driver_food"),
+            "amount": 1,
+            "price": 5,
+            "allergies": [],
+        }
+    
+        status, body = api_request("POST", "/api/foods", food, token=driver)
+    
+        if status == 200:
+            # clean up after the bug so the menu is not left polluted
+            api_request("DELETE", f"/api/foods/{body['id']}", token=admin_token())
+    
+>       assert status == 403, f"a driver was allowed to add a menu item: {status} {body}"
+E       AssertionError: a driver was allowed to add a menu item: 200 {'id': 54, 'foodName': 'driver_food_ewrkfymdvfvj', 'amount': 1, 'price': 5, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}
+E       assert 200 == 403
+
+proj1/tests/test_inventory_menu_authorization_pytest.py:110: AssertionError
+__________________ test_a_customer_cannot_delete_a_menu_item ___________________
+
+menu_item = <function menu_item.<locals>.add at 0x1027d32e0>
+
+    def test_a_customer_cannot_delete_a_menu_item(menu_item):
+        """This proves extension 4b for deletion, which is the destructive half."""
+        food = menu_item()
+        _, customer = register_and_login("customer", "menu_deleter")
+    
+        status, body = api_request("DELETE", f"/api/foods/{food['id']}", token=customer)
+    
+>       assert status == 403, f"a customer deleted a menu item: {status} {body}"
+E       AssertionError: a customer deleted a menu item: 500 {'timestamp': '2026-08-31T04:06:01.057+00:00', 'message': 'could not execute statement [Cannot delete or update a parent row: a foreign key constraint fails (`food_seer`.`inventory_foods`, CONSTRAINT `FKsm3o402ihi95335gqb696spxx` FOREIGN KEY (`foods_id`) REFERENCES `foods` (`id`))] [delete from foods where id=?]; SQL [delete from foods where id=?]; constraint [null]', 'details': 'uri=/api/foods/55'}
+E       assert 500 == 403
+
+proj1/tests/test_inventory_menu_authorization_pytest.py:120: AssertionError
+=========================== short test summary info ============================
+FAILED proj1/tests/test_inventory_menu_authorization_pytest.py::test_a_customer_cannot_rewrite_the_inventory - AssertionError: a customer was allowed to write the inventory: 200 {'id': 1, 'foods': [{'id': 53, 'foodName': 'test_food_ewrkdffpkdrv', 'amount': 5, 'price': 12, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 52, 'foodName': 'test_food_ewrkdffpkdru', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 51, 'foodName': 'test_food_ewrkdfetneui', 'amount': 5, 'price': 12, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 50, 'foodName': 'driver_food_ewrkdfetneuh', 'amount': 1, 'price': 5, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 49, 'foodName': 'rec_food_ewrkdfdxqezx', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['peanut']}, {'id': 48, 'foodName': 'rec_food_ewrkdfdxqezw', 'amount': 5, 'price': 40, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 47, 'foodName': 'rec_food_ewrkdfdxqezv', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['tree nuts']}, {'id': 46, 'foodName': 'rec_food_ewrkdfdxqezu', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['peanut']}, {'id': 45, 'foodName': 'rec_food_ewrkdfdxqezt', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['peanut']}, {'id': 44, 'foodName': 'test_food_ewrkddcwzaxi', 'amount': 5, 'price': 12, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 43, 'foodName': 'test_food_ewrkddcwzaxh', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 42, 'foodName': 'test_food_ewrkddcwzaxf', 'amount': 5, 'price': 12, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 41, 'foodName': 'driver_food_ewrkddcwzaxe', 'amount': 1, 'price': 5, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 40, 'foodName': 'rec_food_ewrkddcbcbzp', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['peanut']}, {'id': 39, 'foodName': 'rec_food_ewrkddcbcbzo', 'amount': 5, 'price': 40, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 38, 'foodName': 'rec_food_ewrkddcbcbzn', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['tree nuts']}, {'id': 37, 'foodName': 'rec_food_ewrkddcbcbzm', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['peanut']}, {'id': 36, 'foodName': 'rec_food_ewrkddcbcbzl', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['peanut']}, {'id': 35, 'foodName': 'test_food_bgyhibrqude', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 34, 'foodName': 'test_food_bgyhibrlcfa', 'amount': 5, 'price': 12, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 33, 'foodName': 'driver_food_bgyhibrlcfa', 'amount': 1, 'price': 5, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}, {'id': 32, 'foodName': 'rec_food_bgyhibrfkgq', 'amount': 5, 'price': 8, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': ['peanut']}]}
+assert 200 == 403
+FAILED proj1/tests/test_inventory_menu_authorization_pytest.py::test_a_driver_cannot_add_a_menu_item - AssertionError: a driver was allowed to add a menu item: 200 {'id': 54, 'foodName': 'driver_food_ewrkfymdvfvj', 'amount': 1, 'price': 5, 'rating': 0.0, 'numberOfRatings': 0, 'allergies': []}
+assert 200 == 403
+FAILED proj1/tests/test_inventory_menu_authorization_pytest.py::test_a_customer_cannot_delete_a_menu_item - AssertionError: a customer deleted a menu item: 500 {'timestamp': '2026-08-31T04:06:01.057+00:00', 'message': 'could not execute statement [Cannot delete or update a parent row: a foreign key constraint fails (`food_seer`.`inventory_foods`, CONSTRAINT `FKsm3o402ihi95335gqb696spxx` FOREIGN KEY (`foods_id`) REFERENCES `foods` (`id`))] [delete from foods where id=?]; SQL [delete from foods where id=?]; constraint [null]', 'details': 'uri=/api/foods/55'}
+assert 500 == 403
+========================= 3 failed, 4 passed in 1.55s ==========================
+
+Finished: Mon Aug 31 00:06:01 EDT 2026
+Exit status: 1
+Output file: /Users/neelan/git/csc510/CSC510-Section2-Group7-Proj3/proj1/test-output/inventory-menu-authorization-pytest-20260831-000559.txt
