@@ -1,0 +1,11 @@
+============================= test session starts =============================
+platform win32 -- Python 3.10.11, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\tierr\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\python.exe
+rootdir: C:\Users\tierr\Documents\CSC510-Section2-Group7-Proj3
+collecting ... collected 4 items
+
+proj1/tests/test_view_personal_orders_pytest.py::test_customer_can_view_personal_orders PASSED [ 25%]
+proj1/tests/test_view_personal_orders_pytest.py::test_personal_orders_do_not_include_another_customers_order PASSED [ 50%]
+proj1/tests/test_view_personal_orders_pytest.py::test_new_customer_receives_empty_personal_order_list PASSED [ 75%]
+proj1/tests/test_view_personal_orders_pytest.py::test_personal_order_details_preserve_repeated_food_entries PASSED [100%]
+
+============================== 4 passed in 5.27s ==============================
