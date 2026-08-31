@@ -182,12 +182,39 @@ Postconditions:
   5. User is prevented from accessing pages outside their role permissions
 
 ## Use Case #5
-Part:
-Name:
-Primary actor:
+Part: Unauthorized User Is Blocked From Restricted Dashboard
+Name: User restricted access features they aren't allowed to see
+Primary actor: User
 Stakeholders & interests:
+    1. User: Wants to know why they can or can't access certain features/information
+    2. Admin: wants role based permissions enforced properly
+    3. Business: Wants data protected from unauthorized access
 Preconditions:
-Trigger:
+    1. Frontend and backend are running correctly
+    2. Restricted pages actually exist, as per staff, admin, and driver pages
+    3. User either not logged in, or logged into a role that does not have permission to access restricted content
+Trigger: User attempts to open a page they are not authorized to access
 Main success scenario:
+        1. User attempts to access restricted page/feature
+        2. System checks to see whether user is authenticated
+        3. System checks to see whether user's role is authorized for that page
+        4. System blocks access because user is not authorized for that content
+        5. Frontend redirects user to a page appropriate for their permissions
+        6. Frontend displays an error message explaining why user can't access the desired page
 Extensions:
+        2a. User is not logged in
+            User is redirected to login page
+        3a. User with customer role attempts to access driver dashboard
+            Access is blocked and user is redirected to customer-appropriate page
+        3b. User with customer role attempts to access admin dashboard
+            Access is blocked and user is redirected to customer-appropriate page
+        3c. User with customer role attempts to access staff dashboard
+            Access is blocked and user is redirected to customer-appropriate page
+        4a. API request is made without valid token
+            Backend rejects request with an unauthorized response
+        5a. Frontend fails to prevent access to restricted page
+            Backend authorization prevents restricted content from loading
+        6a. System does not display a clear, specific error message
+            User redirected to appropriate page
+
 Postconditions:
