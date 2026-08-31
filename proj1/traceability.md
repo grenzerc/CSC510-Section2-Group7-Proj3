@@ -65,10 +65,35 @@
 | Use Case #15 | Main success scenario: the assistant answers a greeting (requires Ollama running) | `test_the_assistant_answers_a_greeting` |
 | Use Case #15 | Extension 4a: an unreachable model is reported as a failure | `test_an_unreachable_model_is_reported_as_a_failure` |
 
+| Use Case #16 | Main success scenario: authenticated customer updates food preferences | `test_customer_can_update_food_preferences` |
+| Use Case #16 | Success postcondition: updated preferences persist | `test_updated_food_preferences_are_returned_in_customer_profile` |
+| Use Case #16 | Extension 3a: unsupported cost preference is rejected | `test_rejects_unsupported_cost_preference` |
+| Use Case #16 | Extension 3b: customer selects no dietary restrictions | `test_customer_can_save_preferences_without_dietary_restrictions` |
+| Use Case #17 | Main success scenario: authenticated customer retrieves food inventory | `test_authenticated_customer_can_browse_food_inventory` |
+| Use Case #17 | Displayed information: foods contain inventory-page information | `test_inventory_foods_contain_displayed_information` |
+| Use Case #17 | Extension 1a: unauthenticated inventory request is rejected | `test_rejects_unauthenticated_food_inventory_request` |
+| Use Case #17 | Success postcondition: browsing does not change inventory | `test_browsing_food_inventory_does_not_change_inventory` |
+| Use Case #18 | Main success scenario: authenticated customer creates a food order | `test_authenticated_customer_can_create_food_order` |
+| Use Case #18 | Success postcondition: created order appears in personal orders | `test_created_order_appears_in_customer_orders` |
+| Use Case #18 | Extension 7a: backend rejects an order without food | `test_rejects_order_without_food` |
+| Use Case #18 | Extension 4a: backend rejects quantity above available stock | `test_rejects_order_quantity_above_available_stock` |
+| Use Case #19 | Main success scenario: customer retrieves personal orders | `test_customer_can_view_personal_orders` |
+| Use Case #19 | Extension 2b: another customer's order is excluded | `test_personal_orders_do_not_include_another_customers_order` |
+| Use Case #19 | Extension 2a: new customer receives an empty order list | `test_new_customer_receives_empty_personal_order_list` |
+| Use Case #19 | Extension 3a: repeated food entries are preserved | `test_personal_order_details_preserve_repeated_food_entries` |
+| Use Case #20 | Main success scenario: customer rates food from a fulfilled order | `test_customer_can_rate_food_from_fulfilled_order` |
+| Use Case #20 | Extension 6a: duplicate rating is rejected | `test_rejects_duplicate_rating_for_same_food_and_order` |
+| Use Case #20 | Extension 2a: food from an unfulfilled order cannot be rated | `test_rejects_rating_food_from_unfulfilled_order` |
+| Use Case #20 | Extension 6b: another customer cannot rate the order | `test_rejects_rating_another_customers_order` |
+
 Current findings:
 - Use Case #1 Extension 5a & Use Case #2 Main Success Scenario / Cross-role tests, plus Use Case #3 Extension 2b, expose a backend defect. The `users.email` column is unique, but registration does not check `existsByEmail` before saving, so duplicate email registration returns HTTP 500 instead of a user-facing validation error (matching Use Case #2 Extension 7a).
 - Use Case #3 Extension 2c exposes a backend defect. The email-format validation branch in `AuthServiceImpl.register` logs and returns the wrong string literal ("Username must be between 3-50 characters" instead of an email-specific message), so the frontend cannot tell the user their email was the problem.
 - Use Case #3 Extension 2f exposes a backend defect. `AuthServiceImpl.register` has no explicit check for a missing role; when `role` is absent, `setCorrectRoles` calls `.toLowerCase()` on a null value, throwing a `NullPointerException` that `GlobalExceptionHandler`'s generic handler reports as HTTP 500 with a raw Java error message instead of a "select a role" validation error.
 - Use Case #4 Extension 5a exposes a backend defect, the sibling of the Use Case #3 Extension 2f finding above. When `role` is present but not one of `driver`/`customer`/`staff` (e.g. `"not-a-real-role"`), `setCorrectRoles` returns an empty string and `AuthServiceImpl.register` stores the account anyway instead of rejecting it. That empty role then breaks Spring Security's authority parsing at login time, so the account can never log in: the backend returns HTTP 401 with the technical message "A granted authority textual representation is required" instead of a message telling the user a role must be selected, permanently locking the account out.
 - Use Case #5 Precondition 2 & Extension 3a/4a expose a significant authorization gap. `DriverStatsController.getDriverStats` has no `@PreAuthorize` annotation, and `SpringSecurityConfig` explicitly `permitAll()`s `GET /api/driverStats/**`. As a result, any driver's earnings, delivery count, and rating can be read by supplying their username, with no login required and with no role check once logged in, unlike every other dashboard-data endpoint in the system (`/api/users`, `/api/orders/my-orders`, `/api/orders/availableOrders`), which correctly reject unauthenticated or wrong-role requests.
-
+- Use Case #16: The backend accepts and persists unsupported cost-preference values.
+- Use Case #17: All tested inventory retrieval and access-control behavior passes.
+- Use Case #18: The backend accepts empty orders and orders exceeding available stock.
+- Use Case #19: All tested personal-order retrieval and account-isolation behavior passes.
+- Use Case #20: The backend allows an authenticated customer to rate another customer's fulfilled order.
