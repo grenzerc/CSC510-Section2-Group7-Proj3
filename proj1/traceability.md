@@ -38,3 +38,8 @@ Current finding:
 | Use Case #14 | Extension 4a (category): "nuts" does not match "tree nuts" | `test_a_broader_restriction_still_hides_the_food` |
 | Use Case #14 | Extension 3b: the premium tier hides food above $35 | `test_premium_customers_can_see_the_whole_menu` |
 | Use Case #14 | Extension 5a: the food API applies no preference filtering | `test_the_food_api_applies_no_preferences_of_its_own` |
+
+| Use Case #15 | Authentication is required to use the assistant | `test_the_assistant_cannot_be_used_without_logging_in` |
+| Use Case #15 | Extension 1a: a driver cannot use the assistant | `test_a_driver_cannot_use_the_assistant` |
+| Use Case #15 | Main success scenario: the assistant answers a greeting (UNVERIFIED - skipped, no Ollama) | `test_the_assistant_answers_a_greeting` |
+| Use Case #15 | Extension 4a: an unreachable model is reported as a failure | `test_an_unreachable_model_is_reported_as_a_failure` |

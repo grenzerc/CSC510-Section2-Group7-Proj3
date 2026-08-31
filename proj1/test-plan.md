@@ -215,3 +215,60 @@ Known Result:
   caller's saved preferences, including a dish the customer is allergic to.
   Filtering is presentation-only in the React client; any other caller of the
   API sees the unfiltered menu.
+
+## Use Case #15: AI Chat Assistant
+
+Test file:
+- `proj1/tests/test_chat_assistant_pytest.py`
+
+Runner:
+- `proj1/tests/run_chat_assistant_pytest.sh`
+
+Output location:
+- `proj1/test-output/`
+
+Setup:
+1. Start the backend:
+   `cd food-seer-backend`
+   `mvn spring-boot:run`
+2. From the repository root, run:
+   `proj1/tests/run_chat_assistant_pytest.sh`
+3. `ChatServiceImpl` posts to a local Ollama at `http://localhost:11434` using
+   the `qwen2.5:1.5b` model. Both values are compile-time constants, so the
+   feature cannot be pointed anywhere else without rebuilding the backend.
+
+Note on approach:
+- Two of these tests are conditional on whether Ollama is running, because the
+  interesting behaviour differs. `test_the_assistant_answers_a_greeting` runs
+  only when Ollama is reachable; `test_an_unreachable_model_is_reported_as_a_failure`
+  runs only when it is not. The file detects which and skips the other.
+
+Test Cases:
+- The chat endpoint is called with no credentials.
+- Extension 1a: a driver account calls the chat endpoint.
+- Main success scenario: a customer sends a greeting and receives a reply
+  (requires Ollama running with `qwen2.5:1.5b` pulled).
+- Extension 4a: a customer sends a message while Ollama is unreachable.
+
+Known Result:
+- Authentication is enforced: an unauthenticated call returns 401.
+- Extension 1a passes: a driver receives 403. Note this documents an
+  inconsistency rather than endorsing it -- DRIVER is absent from this
+  endpoint's role list while present on the order endpoints, which reads as an
+  oversight rather than a decision.
+- The main success scenario is UNVERIFIED. Ollama was not installed and running
+  on the test machine, so `test_the_assistant_answers_a_greeting` skipped. No
+  test in this suite demonstrates that the assistant ever produces a real
+  answer. This is a genuine gap in our coverage, not a passing result.
+- Extension 4a fails, and this is the code-rot finding. With Ollama
+  unreachable, the backend returned:
+
+      HTTP 200
+      {"message": "Error: I/O error on POST request for
+                   \"http://localhost:11434/api/chat\": Connection refused"}
+
+  `ChatServiceImpl` wraps the entire call in `catch (Exception)` and returns
+  the exception text in the same `message` field a real answer uses, with a
+  200 status. A client cannot distinguish a working assistant from a dead one,
+  and the user is shown raw internal exception text -- including the internal
+  host and port -- rendered as though the assistant had said it.
