@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.hamcrest.Matchers.containsString;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
@@ -190,6 +191,24 @@ public class FoodControllerTest {
     // authenticated account, regardless of role, can create food items exactly as if
     // they were Admin/Staff. Only the frontend UI hides the "Add Food" button from other roles.
 
+    // --- Same bug, asserted as a RED test: this is what a correct implementation
+    // would guarantee. It is EXPECTED TO FAIL against the current code. ---
+    @Test
+    @WithMockUser(username = "customer", roles = "CUSTOMER")
+    void testCreateFood_shouldNotActuallyCreateFood_whenSubmittedByNonAdminNonStaffRole() throws Exception {
+        FoodDto food = new FoodDto("SHOULD_BE_BLOCKED", 5, 3, Arrays.asList("NONE"));
+
+        mvc.perform(post("/api/foods")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(TestUtils.asJsonString(food)));
+
+        boolean exists = foodService.getAllFoods().stream()
+                .anyMatch(f -> "SHOULD_BE_BLOCKED".equals(f.getFoodName()));
+        assertFalse(exists,
+                "A correct implementation must not allow a non-Admin/Staff account to create catalog "
+              + "items, but FoodController has no @PreAuthorize on createFood() at all.");
+    }
+
     // --- Use Case #9, Extension 1a: no role check exists on this endpoint either ---
     @Test
     @WithMockUser(username = "customer", roles = "CUSTOMER")
@@ -285,6 +304,29 @@ public class FoodControllerTest {
     // This proves extension 5b: deleteFood() never touches Order.ratedFoodIds, so a
     // rating recorded against the food survives as a dangling reference to an ID that
     // no longer resolves to any row in the foods table.
+
+    // --- Same bug, asserted as a RED test: this is what a correct implementation
+    // would guarantee. It is EXPECTED TO FAIL against the current code. ---
+    @Test
+    @WithMockUser(username = "customer", roles = "CUSTOMER")
+    void testDeleteFood_ratedFoodIdShouldBeRemoved_whenFoodIsDeleted() throws Exception {
+        FoodDto food = new FoodDto("RATED_ITEM_2", 5, 3, Arrays.asList("NONE"));
+        FoodDto saved = foodService.createFood(food);
+        Food foodEntity = foodRepository.findById(saved.getId()).orElseThrow();
+
+        OrderDto orderDto = new OrderDto(0L, "RatedOrder2");
+        orderDto.setFoods(List.of(foodEntity));
+        OrderDto createdOrder = orderService.createOrder(orderDto);
+        orderService.fulfillOrder(createdOrder.getId());
+        foodService.rateFoodInOrder(createdOrder.getId(), saved.getId(), 4.5);
+
+        mvc.perform(delete("/api/foods/" + saved.getId()));
+
+        Order afterDeletion = orderRepository.findById(createdOrder.getId()).orElseThrow();
+        assertFalse(afterDeletion.getRatedFoodIds().contains(saved.getId()),
+                "A correct implementation should clean up rating references when the rated food is "
+              + "deleted, but FoodServiceImpl.deleteFood() (lines 147-179) never touches ratedFoodIds.");
+    }
 
     @Test
     @WithMockUser(username = "staff", roles = "STAFF")

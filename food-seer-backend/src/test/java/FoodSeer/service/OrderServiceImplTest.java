@@ -448,6 +448,28 @@ class OrderServiceImplTest {
     // crediting earnings again -- a second "Delivered" call on an already-fulfilled order
     // still triggers driverStatsService.updateTotalEarnings(), as if a new delivery occurred.
 
+    // --- Same bug, asserted as a RED test: this is what a correct implementation
+    // would guarantee. It is EXPECTED TO FAIL against the current code. ---
+    @Test
+    void updateOrder_secondDeliveredCall_shouldNotCreditEarningsAgain() {
+        DriverStats driver = new DriverStats();
+        driver.setUsername("driverA");
+
+        Order order = new Order();
+        order.setId(407L);
+        order.setStatus("Delivered");
+        order.setIsFulfilled(true); // already delivered and paid out once
+        order.setDriver(driver);
+        order.setDeliveryCost(BigDecimal.valueOf(10));
+
+        when(orderRepository.findById(407L)).thenReturn(Optional.of(order));
+        when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        orderService.updateOrder(407L, "driverA", "Delivered"); // reprocessing an already-fulfilled order
+
+        verify(driverStatsService, never()).updateTotalEarnings(anyString(), any());
+    }
+
     // --- Use Case #10, Extension 5f: a stale Pick Up reverts an already-delivered order ---
     @Test
     void updateOrder_stalePickUp_onAlreadyDeliveredOrder_revertsToUnfulfilled() {

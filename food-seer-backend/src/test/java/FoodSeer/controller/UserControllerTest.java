@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -271,6 +272,18 @@ class UserControllerTest {
     // This proves extension 2a: the self-delete guard in UserManagement.js:67-70 is
     // frontend-only -- a direct DELETE /api/users/{own id} call succeeds, because
     // UserServiceImpl.deleteUser() (UserServiceImpl.java:55-71) has no self-check.
+
+    // --- Same bug, asserted as a RED test: this is what a correct implementation
+    // would guarantee. It is EXPECTED TO FAIL against the current code. ---
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void shouldNotActuallyDeleteAdminAccount_onSelfDeleteAttempt() throws Exception {
+        mockMvc.perform(delete("/api/users/" + adminUser.getId()));
+
+        assertNotNull(userService.findById(adminUser.getId()),
+                "A correct implementation must not allow an admin to delete their own account, "
+              + "but UserServiceImpl.deleteUser() (lines 55-71) has no self-check.");
+    }
 
     // --- Extension 2b: deleting a non-existent user still returns 200 ---
     @Test
