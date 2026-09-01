@@ -54,7 +54,7 @@ Postconditions:
 ## Use Case #6
 Part:  Fulfilled Order
 Name: Fulfilled Order
-Primary Actor: Admin or Driver
+Primary Actor: Admin or staff
 Stakeholders and Interests:
 - Admin/Driver: wants to accurately mark completed work.
 - Customer: wants their order status to reflect reality.
@@ -111,6 +111,7 @@ Extensions:
 - 5b. The deleted user was a driver.
   Their driver statistics record (total deliveries, earnings, rating history) is never touched ,it's left in the database, now orphaned and tied to a username with no account.
 - 5c. The deleted user is the last remaining admin.
+  System has no last-admin protection; the account is deleted exactly like any other, potentially leaving the platform with zero admins and no in-app way to create a new one.
   
 Postconditions:
 - On success: the user account and every order they placed are permanently removed from the system.
