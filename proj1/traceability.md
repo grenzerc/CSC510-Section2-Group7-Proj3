@@ -35,6 +35,31 @@
 | Use Case #5 | Extension 3a & main success scenario steps 2-4: customer blocked from driver/admin-only order endpoint | `test_customer_blocked_from_driver_or_admin_order_endpoint` |
 | Use Case #5 | Precondition 2 & Extension 4a: driver dashboard stats endpoint should reject unauthenticated requests | `test_driver_stats_endpoint_allows_unauthenticated_access` |
 | Use Case #5 | Extension 3a: customer should be blocked from viewing driver dashboard stats | `test_customer_blocked_from_viewing_driver_dashboard_stats` |
+| Use Case #6 | Main success scenario + Postconditions: fulfill an order, confirm it appears in `/api/orders/fulfilledOrders` and the owning customer's `/my-orders/fulfilled` | `test_fulfilling_an_order_updates_status_and_both_order_lists` |
+| Use Case #6 | Extension 2a: order id does not exist, rejected with 412 | `test_fulfilling_a_nonexistent_order_returns_412` |
+| Use Case #6 | Extension 2b: order is already fulfilled, rejected with 410 | `test_fulfilling_an_already_fulfilled_order_returns_410` |
+| Use Case #7 | Main success scenario: admin deletes an ordinary user and their orders, admin count unaffected | `test_admin_deletes_an_ordinary_user_and_their_orders` |
+| Use Case #7 | Extension 2a: admin deletes their own account (documents current behavior — passes) | `test_an_admin_can_delete_their_own_account` |
+| Use Case #7 | Extension 2a: admin account should survive a self-delete attempt (asserts correct behavior — currently FAILS) | `test_an_admin_should_not_be_able_to_delete_their_own_account` |
+| Use Case #7 | Extension 2b: deleting a non-existent user | `test_deleting_a_nonexistent_user_returns_200_instead_of_404` |
+| Use Case #7 | Extension 5a: deleting a user with placed orders | `test_deleting_a_user_with_orders_deletes_their_orders_too` |
+| Use Case #7 | Extension 5b: deleting a driver account | `test_deleting_a_driver_leaves_driver_stats_orphaned` |
+| Use Case #7 | Extension 5c: deleting the last remaining admin (written, not run — see finding below) | `test_the_last_remaining_admin_cannot_be_deleted` |
+| Use Case #8 | Main success scenario: staff adds a food item | `test_staff_can_add_a_food_item` |
+| Use Case #8 | Extension 2a: food should not actually be created by a non-Admin/Staff account (asserts correct behavior — currently FAILS) | `test_customer_should_not_be_able_to_add_a_food_item` |
+| Use Case #9 | Extension 4a: item appears in at least one unfulfilled order | `test_deletion_is_blocked_while_an_unfulfilled_order_contains_the_item` |
+| Use Case #9 | Extension 1a: customer's delete request should be rejected at the authorization layer (asserts correct behavior — currently FAILS, and fails worse than expected — see finding below) | `test_customer_should_not_be_able_to_delete_a_food_item` |
+| Use Case #9 | Extension 5a: deleting a food in a fulfilled order (live environment cannot reach this state — see finding below) | `test_deleting_a_food_in_a_fulfilled_order_fails_before_reaching_extension_5a` |
+| Use Case #9 | Extension 5b: deleting a rated food (live environment cannot reach this state — see finding below) | `test_deleting_a_rated_food_also_fails_before_reaching_extension_5b` |
+| Use Case #10 | Main success scenario: a driver picks up then delivers an order, earnings credited exactly once | `test_a_driver_can_pick_up_and_deliver_an_order` |
+| Use Case #10 | Extension 2b: order already assigned to another driver, or already "Picked Up" | `test_any_driver_can_pick_up_an_order_already_assigned_to_another_driver` |
+| Use Case #10 | Extension 5a: "Delivered" submitted by a driver who is NOT the order's assigned driver | `test_delivered_by_the_wrong_driver_leaves_the_order_unfulfilled` |
+| Use Case #10 | Extension 5b: order's driver is still unassigned when "Delivered" arrives | `test_delivering_an_order_with_no_assigned_driver_crashes` |
+| Use Case #10 | Extension 5c: status value is missing | `test_a_missing_status_value_crashes` |
+| Use Case #10 | Extension 5d: status value is an unrecognized string | `test_an_unrecognized_status_value_is_accepted` |
+| Use Case #10 | Extension 5e: already-delivered order receives a second "Delivered" call (documents current behavior — passes) | `test_a_second_delivered_call_double_credits_earnings` |
+| Use Case #10 | Extension 5e: earnings should not be credited again on a second "Delivered" call (asserts correct behavior — currently FAILS) | `test_a_second_delivered_call_should_not_double_credit_earnings` |
+| Use Case #10 | Extension 5f: stale "Pick Up" click lands on an already-delivered order | `test_a_stale_pickup_reverts_an_already_delivered_order` |
 | Use Case #11 | Main success scenario: admin promotes a customer to staff | `test_admin_can_promote_a_customer_to_staff` |
 | Use Case #11 | Extension 2a: a non-admin cannot list users | `test_a_customer_cannot_list_every_user` |
 | Use Case #11 | Extension 5a: role change on an unknown user id | `test_changing_the_role_of_a_user_that_does_not_exist_is_not_found` |
@@ -91,6 +116,17 @@ Current findings:
 - Use Case #3 Extension 2f exposes a backend defect. `AuthServiceImpl.register` has no explicit check for a missing role; when `role` is absent, `setCorrectRoles` calls `.toLowerCase()` on a null value, throwing a `NullPointerException` that `GlobalExceptionHandler`'s generic handler reports as HTTP 500 with a raw Java error message instead of a "select a role" validation error.
 - Use Case #4 Extension 5a exposes a backend defect, the sibling of the Use Case #3 Extension 2f finding above. When `role` is present but not one of `driver`/`customer`/`staff` (e.g. `"not-a-real-role"`), `setCorrectRoles` returns an empty string and `AuthServiceImpl.register` stores the account anyway instead of rejecting it. That empty role then breaks Spring Security's authority parsing at login time, so the account can never log in: the backend returns HTTP 401 with the technical message "A granted authority textual representation is required" instead of a message telling the user a role must be selected, permanently locking the account out.
 - Use Case #5 Precondition 2 & Extension 3a/4a expose a significant authorization gap. `DriverStatsController.getDriverStats` has no `@PreAuthorize` annotation, and `SpringSecurityConfig` explicitly `permitAll()`s `GET /api/driverStats/**`. As a result, any driver's earnings, delivery count, and rating can be read by supplying their username, with no login required and with no role check once logged in, unlike every other dashboard-data endpoint in the system (`/api/users`, `/api/orders/my-orders`, `/api/orders/availableOrders`), which correctly reject unauthenticated or wrong-role requests.
+- Use Case #7, Extension 2a: `UserServiceImpl.deleteUser()` (lines 55-71) has no self-delete check — the guard exists only in `UserManagement.js`. An admin can delete their own account via a direct API call.
+- Use Case #7, Extension 2b: deleting a non-existent user ID returns 200 OK instead of 404 — `deleteUser()` (lines 59-61) returns silently when the user isn't found.
+- Use Case #7, Extension 5b: `DriverStats` has no foreign key back to `User`; deleting a driver's account leaves their stats row permanently orphaned.
+- Use Case #7, Extension 5c: no check anywhere prevents deleting the last remaining admin, leaving the platform with zero admins and no in-app recovery path.
+- Use Cases #8/#9, Extensions 2a/1a: `FoodController` has no `@PreAuthorize` on `createFood()` or `deleteFood()`, and neither endpoint is restricted in `SpringSecurityConfig` — any authenticated account, regardless of role, can create or delete catalog items.
+- Use Case #9, Extension 5a: `FoodServiceImpl.deleteFood()` (lines 166-172) silently strips a deleted food from every fulfilled order's item list but never recomputes `Order.cost`/`deliveryCost` — price and item list become permanently inconsistent. Confirmed via the JUnit suite in an isolated database (`testDeleteFood_removesItemFromFulfilledOrder_priceStaysStale`).
+- Use Case #9, Extension 5b: `deleteFood()` never touches `Order.ratedFoodIds` — a rating recorded against a food survives as a dangling reference after the food is deleted. Confirmed via the JUnit suite in an isolated database (`testDeleteFood_ratingRecordStillReferencesDeletedItem`).
+- Use Case #9, new finding from the pytest suite: against the live, persistent database, `DELETE /api/foods/{id}` fails with an unhandled 500 for *any* food that was ever added through the normal creation path, for *any* caller, admin included — `deleteFood()` never removes the food from `Inventory.foods` before deleting the row, so MySQL's FK constraint on `inventory_foods` blocks it every time. This is more severe than the authorization gap alone: even the legitimate admin path is broken. It also means the live pytest suite cannot reach the states extensions 5a/5b describe (deletion never succeeds), while the JUnit suite can, because `@BeforeEach` wipes the Inventory row entirely each test. Independently corroborated against Use Case #12's own `test_a_customer_cannot_delete_a_menu_item`, whose docstring predicts this exact failure.
+- Use Case #10, Extensions 5b/5c: `OrderServiceImpl.updateOrder()` (lines 274, 278) has no null-checks on `status` or `order.getDriver()`, causing unhandled `NullPointerException`s that surface as 500 errors.
+- Use Case #10, Extension 5e: `DriverStatsImpl.updateTotalEarnings()` (lines 46-47) is called unconditionally on every "Delivered" transition with no check on `order.getIsFulfilled()` — reprocessing an already-delivered order double-credits both earnings and delivery count.
+- Use Case #10, Extension 5f: a stale "Pick Up" call on an already-delivered order silently reverts `isFulfilled` to false (lines 281-283), while previously-credited earnings are never clawed back — leaving no way to reconcile the mismatch through the app.
 - Use Case #11, Extension 5b: `UserServiceImpl.updateUserRole()` (lines 47-54) calls `user.setRole(role)` with no validation against any role registry. `ROLE_WIZARD` and an empty string both return 200 and persist. The account can still log in but is authorized for nothing, and no screen shows the role is invalid.
 - Use Case #11, Extension 5c: no last-admin guard exists anywhere. Because only an admin can change roles, demoting the last remaining admin permanently removes all administrative access with no in-app recovery path.
 - Use Case #11, Extension 5d: a role change does not revoke outstanding JWTs, so a demoted user keeps their old authority until the token expires.
@@ -110,4 +146,3 @@ Current findings:
 - Use Case #18: The backend accepts empty orders and orders exceeding available stock.
 - Use Case #19: All tested personal-order retrieval and account-isolation behavior passes.
 - Use Case #20: The backend allows an authenticated customer to rate another customer's fulfilled order.
-

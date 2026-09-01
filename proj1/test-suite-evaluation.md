@@ -2,7 +2,10 @@
 
 Scope: the 31 JUnit test classes under `food-seer-backend/src/test/java/FoodSeer/`,
 containing 174 `@Test` methods and no parameterized tests. Counts taken from the
-merged `main` at commit `8d6bc47`.
+merged `main` at commit `8d6bc47`. Findings 1-6 and the first paragraph of the
+closing section cover Use Cases #11-15 and the wider suite; Findings 7-8, and
+the closing section's second paragraph, extend this evaluation with evidence
+specific to Use Cases #6-#10.
 
 ## Verdict
 
@@ -15,7 +18,7 @@ what it does. That is why a suite of 174 tests sits on top of a codebase in whic
 five endpoints are missing authorization entirely, and reports nothing wrong.
 
 Every defect we found in Sections 3 and 5 is invisible to this suite by
-construction, not by oversight. The four findings below give the mechanism.
+construction, not by oversight. The findings below give the mechanism.
 
 ## Finding 1: authorization is asserted only where authorization already works
 
@@ -46,6 +49,18 @@ covered, but the expression is
 `hasAnyRole('ADMIN', 'STAFF', 'CUSTOMER')` on the write paths, so customers can
 rewrite stock. Two tests exist for the controller and both authenticate as `STAFF`
 and assert success. Nobody tested the boundary, so the wrong role list survives.
+
+*Independent corroboration (Use Cases #8-#9):* the same `FoodController` gap was
+found separately, from the test side rather than the annotation side. All ten of
+`FoodControllerTest.java`'s pre-existing tests, `testGetFoods`, `testCreateFood`,
+`testUpdateFood`, `testCreateFoodDuplicateName`, `testCreateFoodInvalid`,
+`testDeleteFoodSuccess`, `testDeleteFoodNotFound`, `testUpdateFoodMissingName`,
+`testUpdateFoodNotFound`, `testUpdateFoodInvalidValues`, are annotated
+`@WithMockUser(username = "staff", roles = "STAFF")` with no exception. A `CUSTOMER`
+or unauthenticated caller is never tried once. Two new red tests, written against
+Use Case #8 extension 2a and Use Case #9 extension 1a, confirm the consequence
+directly: a `CUSTOMER` account can call both `POST /api/foods` and
+`DELETE /api/foods/{id}` and succeed.
 
 ## Finding 2: the one endpoint we broke is tested with security switched off
 
@@ -144,6 +159,9 @@ was never connected.
   assert on their getters. Eleven of the suite's 174 tests are entity tests filed
   under a name that implies end-to-end coverage.
 
+*Related, found independently (Use Case #10):* two more pre-existing tests pass
+while testing nothing, for a different reason, see Finding 8.
+
 ## Finding 6: the suite does not pass
 
 `mvn clean test` does not complete successfully on the merged `main`;
@@ -156,16 +174,114 @@ pre-existing condition of the project as delivered.
 > the Tests run / Failures / Errors / Skipped summary line here, plus the failing
 > test's stack trace, as the raw evidence sample for this finding.
 
+## Finding 7: Use Case #7 (Delete user account) has essentially zero coverage of its own extensions
+
+`UserControllerTest.shouldDeleteUserWhenAdmin` is the only pre-existing test that
+exercises `DELETE /api/users/{id}`:
+
+```java
+@Test
+@WithMockUser(roles = "ADMIN")
+void shouldDeleteUserWhenAdmin() throws Exception {
+    mockMvc.perform(delete("/api/users/" + testUser.getId()))
+            .andExpect(status().isOk());
+    mockMvc.perform(get("/api/users/" + testUser.getId()))
+            .andExpect(status().isNotFound());
+}
+```
+
+It deletes a user that is not the caller, has no orders, is not a driver, and is
+not the last admin, the one case in which nothing can go wrong. Every extension
+the use case itself documents is untouched:
+
+| Extension | What it claims | Pre-existing test | Verdict |
+| --- | --- | --- | --- |
+| 2a: self-delete | Admin can delete their own account; no backend guard | none | uncovered |
+| 2b: delete a non-existent user | Returns 200 instead of 404 | none | uncovered |
+| 5a: user has placed orders | Orders are hard-deleted with no warning | none | uncovered |
+| 5b: deleted user is a driver | `DriverStats` row is permanently orphaned | none | uncovered |
+| 5c: last remaining admin | No guard; platform left with zero admins | none | uncovered |
+
+Five documented failure extensions, five with no test. Our own
+`shouldNotActuallyDeleteAdminAccount_onSelfDeleteAttempt` (extension 2a, JUnit) and
+`test_an_admin_should_not_be_able_to_delete_their_own_account` (extension 2a,
+pytest) are red for exactly this reason: nothing in the pre-existing suite would
+have told anyone the guard was frontend-only.
+
+## Finding 8: two pre-existing driver tests send a status value that doesn't match the code, and pass without testing anything
+
+`OrderControllerTest.java` has two tests, both added under the comment
+`// --- Missing tests added below ---`, that are meant to exercise a driver picking
+up an order:
+
+```java
+void testGetActiveOrders_ForDriver() throws Exception {
+    ...
+    orderService.updateOrder(saved.getId(), "driver", "PICKED_UP");
+    mvc.perform(get("/api/orders/activeOrders/driver"))
+            .andExpect(status().isOk());
+}
+
+void testUpdateOrderStatus_AsDriver() throws Exception {
+    ...
+    String payload = "{\"username\":\"driver\",\"status\":\"PICKED_UP\"}";
+    mvc.perform(post("/api/orders/" + saved.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(payload))
+            .andExpect(status().isOk());
+}
+```
+
+Both send the literal string `"PICKED_UP"`. `OrderServiceImpl.updateOrder()`
+requires an exact match against `"Picked Up"` (line 274,
+`status.equals("Picked Up")`) before it will assign a driver to the order.
+`"PICKED_UP".equals("Picked Up")` is false, so the driver-assignment branch never
+runs, so the order's `driver` field stays null, and its `status` column is left
+holding the literal, non-canonical string `"PICKED_UP"`.
+
+The consequence compounds in `testGetActiveOrders_ForDriver`:
+`OrderServiceImpl.getActiveOrders()` queries
+`orderRepository.findByDriverUsernameAndStatus(username, "Picked Up")`, the same
+exact-match string, and now also a driver field that was never set. The query can
+only return an empty list. The test asserts `status().isOk()` and nothing else;
+it never checks that the returned list contains the order, or that it is
+non-empty. Both tests pass every time, and both pass without ever exercising the
+driver-assignment code path their names claim to test.
+
+This is a defect in the *tests*, not in the application, but it means Use Case
+#10's main success scenario (driver picks up, then delivers an order) had a
+green-looking but empty test before our own coverage was added. Our pytest suite's
+`test_a_driver_can_pick_up_and_deliver_an_order` uses the correct literal
+`"Picked Up"` and exercises the real path end to end.
+
 ## What this implies for our own tests
 
-Our 29 tests found 15 real failures against the same code these 174 tests pass on.
-The difference is not effort or volume; it is the source of the oracle. Their tests
-take their expected values from the implementation, so the expected value and the
-actual value can never disagree. Ours take expected values from the use cases, such as
-"a driver's earnings require a login" or "an allergic customer is not shown food they
-cannot eat," so a disagreement is possible, and fifteen times it happened.
+Our pytest suite (29 tests, Use Cases #1-5 and #11-20) found 15 real failures
+against the same code these 174 tests pass on. The difference is not effort or
+volume; it is the source of the oracle. Their tests take their expected values
+from the implementation, so the expected value and the actual value can never
+disagree. Ours take expected values from the use cases, such as "a driver's
+earnings require a login" or "an allergic customer is not shown food they cannot
+eat," so a disagreement is possible, and fifteen times it happened.
 
 This is also the strongest argument for the black-box, over-HTTP approach we chose.
 A test that runs inside the application's own context can be made to pass by
 adjusting the context, as `addFilters = false` demonstrates. A test that sends an
 HTTP request to a running server and reads the status code cannot.
+
+A separate pair of suites (25 pytest tests plus 29 JUnit tests, Use Cases #6-#10)
+reaches the same conclusion from a different angle. Both found the same underlying
+defects the same way: expected values were taken from the use cases' own
+extensions, not from the code. Several tests in each suite were written twice on
+purpose, once asserting the code's actual (buggy) behavior, once asserting the
+behavior the use case actually specifies, and the second version fails every time,
+which is the point: a failing test against a real fault is a finding, not a
+mistake. Running both a JUnit suite and a black-box pytest suite against the same
+use cases also surfaced something the black-box suite alone could not have shown
+on its own: against the live, persistent database, `DELETE /api/foods/{id}` fails
+with an unhandled 500 for any food ever added, for any caller, admin included,
+because `deleteFood()` never removes the food from `Inventory.foods` before
+deleting the row. The JUnit suite, running against an isolated database wiped
+before each test, does not hit this blocker, and so is the one that actually
+demonstrates the deeper order-mutation and dangling-rating defects extensions 5a
+and 5b describe. Neither suite alone would have shown both halves of this story.
