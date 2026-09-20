@@ -500,9 +500,7 @@ export const rateFoodItem = async (orderId, foodId, rating) => {
 export const fetchDriverDashboard = async (user) => {
   const response = await fetch(`${API_BASE_URL}/api/driverStats?username=${encodeURIComponent(user)}`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: createHeaders(true),
   });
 
   if (!response.ok) {

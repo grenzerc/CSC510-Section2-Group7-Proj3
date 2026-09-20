@@ -1,7 +1,7 @@
 """Use Case #13 -- View driver delivery statistics.
 
-The happy path here works. Everything else in this file is about who else can
-read it, which turns out to be everyone.
+Drivers can read their own statistics; other accounts and anonymous requests
+must not be able to read them.
 """
 
 import urllib.parse
@@ -33,12 +33,7 @@ def test_a_driver_can_read_their_own_statistics():
 
 
 def test_driver_statistics_require_a_login():
-    """This proves extension 2a: earnings are not public.
-
-    Expected to fail today. SpringSecurityConfig calls permitAll() on every GET
-    under /api/driverStats, and DriverStatsController has no @PreAuthorize --
-    the annotation is imported in that file and never used. No token needed.
-    """
+    """This proves extension 2a: earnings are not public."""
     driver, _ = register_and_login("driver", "public_stats")
 
     status, body = api_request("GET", stats_path(driver["username"]))
@@ -47,11 +42,7 @@ def test_driver_statistics_require_a_login():
 
 
 def test_one_driver_cannot_read_another_drivers_statistics():
-    """This proves extension 2b.
-
-    Expected to fail today. The endpoint reads the username straight off the
-    query string and never compares it to whoever is holding the token.
-    """
+    """This proves extension 2b: drivers cannot read another driver's earnings."""
     victim, _ = register_and_login("driver", "victim")
     _, snooper = register_and_login("driver", "snooper")
 
@@ -70,13 +61,11 @@ def test_a_customer_cannot_read_driver_statistics():
     assert status == 403, f"a customer read driver earnings: {status} {body}"
 
 
-def test_an_unknown_username_is_not_found():
-    """This proves extension 2c.
+def test_an_unknown_username_still_requires_login():
+    """Authenticate before revealing whether statistics exist.
 
-    Expected to fail today. The controller returns 200 with whatever the
-    service produced, so a caller cannot tell "no such driver" apart from
-    "a driver who has not delivered anything yet".
+    Authorized missing-driver behavior is covered by DriverStatsSecurityTest.
     """
     status, body = api_request("GET", stats_path("nobody_by_this_name"))
 
-    assert status == 404, f"expected 404 for an unknown driver, got {status} {body}"
+    assert status == 401, f"expected 401 without credentials, got {status} {body}"
