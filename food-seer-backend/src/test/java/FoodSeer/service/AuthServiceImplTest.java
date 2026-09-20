@@ -99,6 +99,40 @@ public class AuthServiceImplTest {
     }
 
     @Test
+    void register_whenPasswordSevenChars_returnsBadRequest() {
+        // Boundary check: the stated policy is a minimum of 8 characters, so
+        // a 7-character password must still be rejected.
+        RegisterRequestDto req = mock(RegisterRequestDto.class);
+        when(req.username()).thenReturn("validUser");
+        when(userRepository.existsByUsername("validUser")).thenReturn(false);
+        when(req.password()).thenReturn("abc1234"); // 7 chars
+
+        ResponseEntity<Map<String, String>> resp = authService.register(req);
+
+        assertEquals(400, resp.getStatusCodeValue());
+        assertTrue(resp.getBody().containsKey("error"));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void register_whenPasswordEightChars_isAccepted() {
+        // Boundary check: an 8-character password meets the stated minimum
+        // and should be accepted.
+        RegisterRequestDto req = mock(RegisterRequestDto.class);
+        when(req.username()).thenReturn("validUser");
+        when(req.password()).thenReturn("abc12345"); // 8 chars
+        when(req.email()).thenReturn("validUser@example.com");
+        when(req.role()).thenReturn("customer");
+        when(userRepository.existsByUsername("validUser")).thenReturn(false);
+        when(passwordEncoder.encode("abc12345")).thenReturn("hashedPwd");
+
+        ResponseEntity<Map<String, String>> resp = authService.register(req);
+
+        assertEquals(200, resp.getStatusCodeValue());
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
     void register_whenDriverRole_createsUserAndDriverStats() {
         RegisterRequestDto req = mock(RegisterRequestDto.class);
         when(req.username()).thenReturn("driverOne");

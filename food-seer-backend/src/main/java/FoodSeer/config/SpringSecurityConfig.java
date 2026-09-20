@@ -61,7 +61,7 @@ public class SpringSecurityConfig {
                 authorize.requestMatchers( "/auth/**" ).permitAll();
                 authorize.requestMatchers( HttpMethod.OPTIONS, "/**" ).permitAll(); // allows preflight
                 authorize.requestMatchers( HttpMethod.GET, "/api/locations/{id:[0-9]+}" ).permitAll();
-                authorize.requestMatchers( HttpMethod.GET, "/api/driverStats/**").permitAll();
+                authorize.requestMatchers( HttpMethod.GET, "/api/driverStats", "/api/driverStats/**").authenticated();
                 authorize.requestMatchers( HttpMethod.GET, "/api/orders/**").permitAll();
                 authorize.requestMatchers( HttpMethod.POST, "/api/orders/**").permitAll();
                 authorize.anyRequest().authenticated();

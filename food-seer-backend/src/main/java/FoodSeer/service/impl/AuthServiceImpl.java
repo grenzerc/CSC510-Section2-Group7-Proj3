@@ -59,7 +59,7 @@ public class AuthServiceImpl implements AuthService {
         }
         
         // Password checks
-        if ( req.password().length() < 2 || req.password().length() > 128){
+        if ( req.password().length() < 8 || req.password().length() > 128){
             logger.error("Password must be longer than 8 characters");
             return ResponseEntity.badRequest().body( Map.of( "error", "Password must be longer than 8 characters" ) );
         }
