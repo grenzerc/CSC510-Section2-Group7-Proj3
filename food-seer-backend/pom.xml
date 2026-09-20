@@ -197,6 +197,33 @@
     </pluginManagement>
 
     <plugins>
+      <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <version>1.19.4</version>
+        <configuration>
+          <targetClasses>
+            <param>FoodSeer.service.impl.DriverStatsImpl</param>
+          </targetClasses>
+          <targetTests>
+            <param>FoodSeer.service.DriverStatsImplTest</param>
+          </targetTests>
+          <threads>1</threads>
+          <timestampedReports>false</timestampedReports>
+          <outputFormats>
+            <param>HTML</param>
+            <param>XML</param>
+          </outputFormats>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-junit5-plugin</artifactId>
+            <version>1.2.3</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
       <!-- ✅ Required for Spring Boot builds -->
       <plugin>
         <groupId>org.springframework.boot</groupId>
@@ -206,26 +233,24 @@
 
       <!-- ✅ JaCoCo Coverage -->
       <plugin>
-    <groupId>org.jacoco</groupId>
-    <artifactId>jacoco-maven-plugin</artifactId>
-    <version>0.8.11</version>
-    <executions>
-        <execution>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.11</version>
+        <executions>
+          <execution>
             <goals>
-                <goal>prepare-agent</goal>
+              <goal>prepare-agent</goal>
             </goals>
-        </execution>
-        <execution>
+          </execution>
+          <execution>
             <id>report</id>
             <phase>test</phase>
             <goals>
-                <goal>report</goal>
+              <goal>report</goal>
             </goals>
-        </execution>
-    </executions>
-</plugin>
-
-
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
