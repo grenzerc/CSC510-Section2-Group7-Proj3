@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import FoodSeer.dto.OrderDto;
@@ -171,9 +172,10 @@ public class OrderController {
         return ResponseEntity.ok(availableOrders);
     }
 
-//    @PreAuthorize("hasAnyRole('ADMIN', 'DRIVER')")
+    // Reuses the generic username-ownership resolver introduced for DriverStatsController.
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('DRIVER') and @driverStatsAccess.isOwner(authentication, #username))")
     @GetMapping("/activeOrders/{username}")
-    public ResponseEntity<?> getActiveOrders(@PathVariable String username){
+    public ResponseEntity<?> getActiveOrders(@P("username") @PathVariable String username){
         logger.info("Fetching all picked up orders for the driver: {}", username);
         List<OrderDto> activeOrders = orderService.getActiveOrders(username);
         return ResponseEntity.ok(activeOrders);
